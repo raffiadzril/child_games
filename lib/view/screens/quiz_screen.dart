@@ -1,0 +1,559 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../core/constants/colors.dart';
+import '../../core/constants/dimensions.dart';
+import '../../core/constants/fonts.dart';
+import '../../core/constants/radius.dart';
+import '../../data/models/challenge_model.dart';
+import '../../providers/quiz_provider.dart';
+import '../widgets/question_widget.dart';
+
+/// Screen untuk menampilkan quiz dengan animasi dan transisi
+class QuizScreen extends StatefulWidget {
+  final ChallengeModel challenge;
+
+  const QuizScreen({super.key, required this.challenge});
+
+  @override
+  State<QuizScreen> createState() => _QuizScreenState();
+}
+
+class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
+  late AnimationController _progressController;
+  late AnimationController _fadeController;
+  late Animation<double> _progressAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize animation controllers
+    _progressController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    // Initialize animations
+    _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _progressController, curve: Curves.easeInOut),
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<QuizProvider>().loadQuiz(widget.challenge);
+        _startAnimations();
+      }
+    });
+  }
+
+  void _startAnimations() {
+    if (!mounted) return; // Safety check
+
+    _fadeController.forward();
+    _progressController.forward();
+  }
+
+  @override
+  void dispose() {
+    _progressController.dispose();
+    _fadeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.backgroundPrimary,
+      appBar: _buildAnimatedAppBar(),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.backgroundPrimary,
+              AppColors.backgroundPrimary.withOpacity(0.8),
+            ],
+          ),
+        ),
+        child: Consumer<QuizProvider>(
+          builder: (context, quizProvider, child) {
+            // Loading state
+            if (quizProvider.isLoading) {
+              return _buildLoadingState();
+            }
+
+            // Error state
+            if (quizProvider.hasError) {
+              return _buildErrorState(quizProvider);
+            }
+
+            // Quiz completed state
+            if (quizProvider.isQuizCompleted) {
+              return _buildQuizResult(quizProvider);
+            }
+
+            // Quiz active state
+            return Column(
+              children: [
+                // Animated Progress bar
+                _buildAnimatedProgressBar(quizProvider),
+
+                // Animated Question content dengan smooth transition + error handling
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500),
+                    transitionBuilder: (
+                      Widget child,
+                      Animation<double> animation,
+                    ) {
+                      return SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(1.0, 0.0),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                          ),
+                        ),
+                        child: FadeTransition(opacity: animation, child: child),
+                      );
+                    },
+                    child:
+                        quizProvider.currentQuestion != null &&
+                                quizProvider.currentOptions != null
+                            ? QuestionWidget(
+                              key: ValueKey(
+                                '${quizProvider.currentQuestion!.id}_${quizProvider.currentQuestionIndex}',
+                              ),
+                              question: quizProvider.currentQuestion!,
+                              options: quizProvider.currentOptions!,
+                              onAnswerSelected: (optionId) {
+                                if (mounted) {
+                                  quizProvider.submitAnswer(optionId);
+                                }
+                              },
+                            )
+                            : const SizedBox.shrink(),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAnimatedAppBar() {
+    return AppBar(
+      title: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Text(
+          widget.challenge.title,
+          style: AppFonts.headlineMedium.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: AppFonts.semiBold,
+          ),
+        ),
+      ),
+      backgroundColor: AppColors.backgroundPrimary,
+      elevation: 0,
+      centerTitle: true,
+      leading: IconButton(
+        icon: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.backgroundSecondary,
+            borderRadius: BorderRadius.circular(AppRadius.radiusM),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadow,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Icon(
+            Icons.arrow_back_ios_new,
+            color: AppColors.textPrimary,
+            size: 18,
+          ),
+        ),
+        onPressed: () => Navigator.pop(context),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppDimensions.paddingXL),
+            decoration: BoxDecoration(
+              color: AppColors.backgroundSecondary,
+              borderRadius: BorderRadius.circular(AppRadius.radiusXL),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadow,
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              strokeWidth: 3,
+            ),
+          ),
+          const SizedBox(height: AppDimensions.marginL),
+          Text(
+            'Memuat pertanyaan...',
+            style: AppFonts.bodyLarge.copyWith(color: AppColors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(QuizProvider quizProvider) {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(AppDimensions.paddingL),
+        padding: const EdgeInsets.all(AppDimensions.paddingXL),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundSecondary,
+          borderRadius: BorderRadius.circular(AppRadius.radiusXL),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadow,
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppDimensions.paddingL),
+              decoration: BoxDecoration(
+                color: AppColors.error.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.error_outline,
+                size: 48,
+                color: AppColors.error,
+              ),
+            ),
+            const SizedBox(height: AppDimensions.marginL),
+            Text(
+              'Oops! Terjadi Kesalahan',
+              style: AppFonts.headlineMedium.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: AppFonts.semiBold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppDimensions.marginM),
+            Text(
+              quizProvider.errorMessage ?? 'Terjadi kesalahan saat memuat quiz',
+              style: AppFonts.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppDimensions.marginXL),
+            ElevatedButton.icon(
+              onPressed: () => quizProvider.loadQuiz(widget.challenge),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Coba Lagi'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.paddingL,
+                  vertical: AppDimensions.paddingM,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.radiusButton),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnimatedProgressBar(QuizProvider quizProvider) {
+    return Container(
+      margin: const EdgeInsets.all(AppDimensions.paddingM),
+      padding: const EdgeInsets.all(AppDimensions.paddingL),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundSecondary,
+        borderRadius: BorderRadius.circular(AppRadius.radiusL),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  'Pertanyaan ${quizProvider.currentQuestion?.questionNumber ?? quizProvider.currentQuestionIndex + 1} dari ${quizProvider.totalQuestions}',
+                  style: AppFonts.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: AppFonts.medium,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.paddingM,
+                  vertical: AppDimensions.paddingS,
+                ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: AppColors.gradientPrimary),
+                  borderRadius: BorderRadius.circular(AppRadius.radiusM),
+                ),
+                child: Text(
+                  'Skor: ${quizProvider.score}',
+                  style: AppFonts.labelMedium.copyWith(
+                    color: Colors.white,
+                    fontWeight: AppFonts.semiBold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppDimensions.marginM),
+          Stack(
+            children: [
+              Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundPrimary,
+                  borderRadius: BorderRadius.circular(AppRadius.radiusS),
+                ),
+              ),
+              AnimatedBuilder(
+                animation: _progressController,
+                builder: (context, child) {
+                  return Container(
+                    height: 8,
+                    width:
+                        MediaQuery.of(context).size.width *
+                        (quizProvider.progress * _progressAnimation.value),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: AppColors.gradientPrimary,
+                      ),
+                      borderRadius: BorderRadius.circular(AppRadius.radiusS),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.4),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuizResult(QuizProvider quizProvider) {
+    final maxScore = quizProvider.maxPossibleScore;
+    final percentage =
+        maxScore > 0 ? (quizProvider.score / maxScore * 100).round() : 0;
+
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.all(AppDimensions.paddingL),
+          padding: const EdgeInsets.all(AppDimensions.paddingXL),
+          decoration: BoxDecoration(
+            color: AppColors.backgroundSecondary,
+            borderRadius: BorderRadius.circular(AppRadius.radiusXL),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadow,
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Animated Result icon
+              TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 1000),
+                tween: Tween(begin: 0.0, end: 1.0),
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Container(
+                      padding: const EdgeInsets.all(AppDimensions.paddingL),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors:
+                              percentage >= 70
+                                  ? AppColors.gradientNature
+                                  : AppColors.gradientSunset,
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        percentage >= 70
+                            ? Icons.celebration
+                            : Icons.sentiment_satisfied,
+                        size: 60,
+                        color: Colors.white,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: AppDimensions.marginL),
+
+              // Result text with animation
+              TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 800),
+                tween: Tween(begin: 0.0, end: 1.0),
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Text(
+                      percentage >= 70 ? 'Fantastis!' : 'Bagus Sekali!',
+                      style: AppFonts.displayMedium.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: AppFonts.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: AppDimensions.marginM),
+
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.paddingL,
+                  vertical: AppDimensions.paddingM,
+                ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: AppColors.gradientPrimary),
+                  borderRadius: BorderRadius.circular(AppRadius.radiusL),
+                ),
+                child: Text(
+                  'Skor: ${quizProvider.score}/${quizProvider.maxPossibleScore}',
+                  style: AppFonts.headlineMedium.copyWith(
+                    color: Colors.white,
+                    fontWeight: AppFonts.semiBold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppDimensions.marginM),
+
+              // Animated percentage
+              TweenAnimationBuilder<int>(
+                duration: const Duration(milliseconds: 1500),
+                tween: IntTween(begin: 0, end: percentage),
+                builder: (context, value, child) {
+                  return Text(
+                    '$value%',
+                    style: AppFonts.gameScore.copyWith(
+                      color:
+                          percentage >= 70
+                              ? AppColors.success
+                              : AppColors.warning,
+                      fontWeight: AppFonts.extraBold,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: AppDimensions.marginXL),
+
+              // Action buttons with enhanced styling
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => quizProvider.resetQuiz(),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Ulangi'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.backgroundPrimary,
+                        foregroundColor: AppColors.textPrimary,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppDimensions.paddingM,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppRadius.radiusButton,
+                          ),
+                          side: BorderSide(color: AppColors.border),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppDimensions.marginM),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.check),
+                      label: const Text('Selesai'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppDimensions.paddingM,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppRadius.radiusButton,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
