@@ -3,6 +3,7 @@ import '../data/models/challenge_model.dart';
 import '../data/models/question_model.dart';
 import '../data/models/option_model.dart';
 import '../data/repositories/question_repository.dart';
+import 'user_provider.dart';
 
 /// Provider untuk mengelola state quiz
 class QuizProvider extends ChangeNotifier {
@@ -92,7 +93,10 @@ class QuizProvider extends ChangeNotifier {
   }
 
   /// Submit jawaban dan pindah ke pertanyaan selanjutnya
-  void submitAnswer(String selectedOptionId) {
+  Future<void> submitAnswer(
+    String selectedOptionId, {
+    UserProvider? userProvider,
+  }) async {
     if (_currentQuestionIndex >= _questionsWithOptions.length) return;
 
     final currentOptions =
@@ -102,11 +106,30 @@ class QuizProvider extends ChangeNotifier {
       (option) => option.id == selectedOptionId,
     );
 
+    final currentQuestion =
+        _questionsWithOptions[_currentQuestionIndex]['question']
+            as QuestionModel;
+
     // Simpan jawaban user
     _userAnswers.add(selectedOptionId);
 
     // Update score berdasarkan scoreOption
     _score += selectedOption.scoreOption;
+
+    // Simpan jawaban ke database jika userProvider tersedia
+    if (userProvider != null && userProvider.isUserLoggedIn) {
+      try {
+        await userProvider.saveUserAnswer(
+          questionId: currentQuestion.id,
+          selectedOptionId: selectedOptionId,
+        );
+        print('QuizProvider: Answer saved successfully');
+      } catch (e) {
+        print('QuizProvider: Failed to save answer: $e');
+        // Note: Kita tidak menghentikan quiz jika gagal save answer
+        // karena user masih bisa melanjutkan quiz
+      }
+    }
 
     // Pindah ke pertanyaan selanjutnya atau selesaikan quiz
     if (_currentQuestionIndex < _questionsWithOptions.length - 1) {

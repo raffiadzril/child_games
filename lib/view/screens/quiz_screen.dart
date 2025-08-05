@@ -4,9 +4,13 @@ import '../../core/constants/colors.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/radius.dart';
+import '../../core/services/sound_service.dart';
 import '../../data/models/challenge_model.dart';
 import '../../providers/quiz_provider.dart';
+import '../../providers/user_provider.dart';
 import '../widgets/question_widget.dart';
+import '../widgets/animated_gradient_background.dart';
+import '../widgets/rei_result_widget.dart';
 
 /// Screen untuk menampilkan quiz dengan animasi dan transisi
 class QuizScreen extends StatefulWidget {
@@ -23,10 +27,14 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _progressAnimation;
   late Animation<double> _fadeAnimation;
+  bool _hasLoadedReiResult = false;
 
   @override
   void initState() {
     super.initState();
+
+    // Reset loading flag
+    _hasLoadedReiResult = false;
 
     // Initialize animation controllers
     _progressController = AnimationController(
@@ -51,6 +59,11 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
+        // Lower music volume for quiz session with smooth fade
+        SoundService.instance.lowerVolumeForQuiz();
+
+        // Reset REI result untuk quiz baru
+        context.read<UserProvider>().resetReiResult();
         context.read<QuizProvider>().loadQuiz(widget.challenge);
         _startAnimations();
       }
@@ -64,8 +77,19 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
     _progressController.forward();
   }
 
+  /// Handle navigation back with volume fade
+  Future<void> _navigateBack() async {
+    // Restore normal music volume with fade before leaving
+    await SoundService.instance.restoreNormalVolume();
+
+    if (mounted) {
+      Navigator.pop(context);
+    }
+  }
+
   @override
   void dispose() {
+    // Note: Volume restore is handled in _navigateBack() for smooth user experience
     _progressController.dispose();
     _fadeController.dispose();
     super.dispose();
@@ -76,17 +100,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
     return Scaffold(
       backgroundColor: AppColors.backgroundPrimary,
       appBar: _buildAnimatedAppBar(),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.backgroundPrimary,
-              AppColors.backgroundPrimary.withOpacity(0.8),
-            ],
-          ),
-        ),
+      body: AnimatedGradientBackground(
         child: Consumer<QuizProvider>(
           builder: (context, quizProvider, child) {
             // Loading state
@@ -140,9 +154,14 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                               ),
                               question: quizProvider.currentQuestion!,
                               options: quizProvider.currentOptions!,
-                              onAnswerSelected: (optionId) {
+                              onAnswerSelected: (optionId) async {
                                 if (mounted) {
-                                  quizProvider.submitAnswer(optionId);
+                                  final userProvider =
+                                      context.read<UserProvider>();
+                                  await quizProvider.submitAnswer(
+                                    optionId,
+                                    userProvider: userProvider,
+                                  );
                                 }
                               },
                             )
@@ -192,7 +211,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
             size: 18,
           ),
         ),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () => _navigateBack(),
       ),
     );
   }
@@ -392,6 +411,93 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildQuizResult(QuizProvider quizProvider) {
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, child) {
+        // Load REI result hanya sekali saat quiz completed
+        if (!_hasLoadedReiResult && userProvider.isUserLoggedIn) {
+          _hasLoadedReiResult = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            userProvider.loadReiResult();
+          });
+        }
+
+        if (userProvider.isLoading && !userProvider.hasReiResult) {
+          return SingleChildScrollView(child: _buildLoadingREI());
+        }
+
+        if (userProvider.reiResult != null) {
+          // Tampilkan hasil REI dengan scroll
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(AppDimensions.paddingM),
+            child: ReiResultWidget(
+              reiResult: userProvider.reiResult!,
+              onContinue: () {
+                _navigateBack();
+              },
+            ),
+          );
+        } else {
+          // Fallback ke tampilan skor biasa jika belum ada REI result
+          return SingleChildScrollView(
+            child: _buildTraditionalQuizResult(quizProvider),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildLoadingREI() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Animated loading icon
+          TweenAnimationBuilder<double>(
+            duration: const Duration(seconds: 2),
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, value, child) {
+              return Transform.rotate(
+                angle: value * 6.28, // 2π for full rotation
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, AppColors.secondary],
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.analytics,
+                    size: 48,
+                    color: Colors.white,
+                  ),
+                ),
+              );
+            },
+          ),
+
+          const SizedBox(height: AppDimensions.marginL),
+
+          Text(
+            'Menghitung Hasil REI...',
+            style: AppFonts.headlineMedium.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: AppDimensions.marginM),
+
+          Text(
+            'Respect • Equity • Inclusion',
+            style: AppFonts.bodyMedium.copyWith(color: AppColors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTraditionalQuizResult(QuizProvider quizProvider) {
     final maxScore = quizProvider.maxPossibleScore;
     final percentage =
         maxScore > 0 ? (quizProvider.score / maxScore * 100).round() : 0;
@@ -531,7 +637,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                   const SizedBox(width: AppDimensions.marginM),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => _navigateBack(),
                       icon: const Icon(Icons.check),
                       label: const Text('Selesai'),
                       style: ElevatedButton.styleFrom(

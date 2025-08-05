@@ -1,37 +1,50 @@
 import 'base_model.dart';
+import 'package:uuid/uuid.dart';
 
-/// Model untuk user/player
+/// Model untuk user/player dengan biodata lengkap
 class UserModel extends BaseModel {
+  @override
   final String id;
-  final String email;
-  final String? displayName;
-  final String? avatarUrl;
-  final int level;
-  final int totalScore;
+  final String name;
+  final String gender; // 'laki-laki' atau 'perempuan'
+  final int age;
+  final String
+  className; // Menggunakan className karena class adalah reserved word
+  final String role; // Auto set ke 'murid'
+  @override
   final DateTime createdAt;
+  @override
   final DateTime updatedAt;
 
   UserModel({
-    required this.id,
-    required this.email,
-    this.displayName,
-    this.avatarUrl,
-    this.level = 1,
-    this.totalScore = 0,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+    String? id,
+    required this.name,
+    required this.gender,
+    required this.age,
+    required this.className,
+    this.role = 'murid',
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) : id = id ?? const Uuid().v4(),
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] as String,
-      email: json['email'] as String,
-      displayName: json['display_name'] as String?,
-      avatarUrl: json['avatar_url'] as String?,
-      level: json['level'] as int? ?? 1,
-      totalScore: json['total_score'] as int? ?? 0,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      name: json['name'] as String,
+      gender: json['gender'] as String,
+      age: json['age'] as int,
+      className: json['class'] as String,
+      role: json['role'] as String? ?? 'murid',
+      createdAt:
+          json['created_at'] != null
+              ? DateTime.parse(json['created_at'] as String)
+              : DateTime.now(),
+      updatedAt:
+          json['updated_at'] != null
+              ? DateTime.parse(json['updated_at'] as String)
+              : DateTime.now(),
     );
   }
 
@@ -39,11 +52,11 @@ class UserModel extends BaseModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'email': email,
-      'display_name': displayName,
-      'avatar_url': avatarUrl,
-      'level': level,
-      'total_score': totalScore,
+      'name': name,
+      'gender': gender,
+      'age': age,
+      'class': className,
+      'role': role,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -52,23 +65,50 @@ class UserModel extends BaseModel {
   @override
   UserModel copyWith({
     String? id,
-    String? email,
-    String? displayName,
-    String? avatarUrl,
-    int? level,
-    int? totalScore,
+    String? name,
+    String? gender,
+    int? age,
+    String? className,
+    String? role,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return UserModel(
       id: id ?? this.id,
-      email: email ?? this.email,
-      displayName: displayName ?? this.displayName,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-      level: level ?? this.level,
-      totalScore: totalScore ?? this.totalScore,
+      name: name ?? this.name,
+      gender: gender ?? this.gender,
+      age: age ?? this.age,
+      className: className ?? this.className,
+      role: role ?? this.role,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
+  }
+
+  @override
+  String toString() {
+    return 'UserModel(id: $id, name: $name, gender: $gender, age: $age, className: $className, role: $role)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is UserModel &&
+        other.id == id &&
+        other.name == name &&
+        other.gender == gender &&
+        other.age == age &&
+        other.className == className &&
+        other.role == role;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        name.hashCode ^
+        gender.hashCode ^
+        age.hashCode ^
+        className.hashCode ^
+        role.hashCode;
   }
 }

@@ -3,13 +3,16 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/theme/app_theme.dart';
 import 'core/services/sound_service.dart';
-import 'routes/app_routes.dart';
-import 'view/screens/home_screen.dart';
+import 'view/screens/splash_screen.dart';
 import 'providers/challenge_provider.dart';
 import 'providers/quiz_provider.dart';
+import 'providers/user_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Clean up any existing sound service instances first
+  await SoundService.globalCleanup();
 
   await Supabase.initialize(
     url: 'https://jokvxdrxswytjjhxuhvk.supabase.co',
@@ -26,8 +29,56 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    // Add observer untuk lifecycle app
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    // Remove observer dan cleanup sound service
+    WidgetsBinding.instance.removeObserver(this);
+    SoundService.globalCleanup();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.paused:
+        print('App paused - stopping background music');
+        SoundService.instance.pauseBackgroundMusic();
+        break;
+      case AppLifecycleState.resumed:
+        print('App resumed - starting background music');
+        SoundService.instance.startBackgroundMusic();
+        break;
+      case AppLifecycleState.inactive:
+        print('App inactive - pausing background music');
+        SoundService.instance.pauseBackgroundMusic();
+        break;
+      case AppLifecycleState.detached:
+        print('App detached - stopping all audio');
+        SoundService.instance.stopBackgroundMusic();
+        break;
+      case AppLifecycleState.hidden:
+        print('App hidden - pausing background music');
+        SoundService.instance.pauseBackgroundMusic();
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,12 +97,18 @@ class MyApp extends StatelessWidget {
             return QuizProvider();
           },
         ),
+        ChangeNotifierProvider(
+          create: (_) {
+            print('Creating UserProvider');
+            return UserProvider();
+          },
+        ),
       ],
       child: MaterialApp(
         title: 'Child Games',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
-        home: const HomeScreen(),
+        home: const SplashScreen(),
         // onGenerateRoute: AppRoutes.generateRoute,
         // initialRoute: AppRoutes.home,
       ),

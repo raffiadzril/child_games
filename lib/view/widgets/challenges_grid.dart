@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/dimensions.dart';
 import '../../providers/challenge_provider.dart';
+import '../../providers/user_provider.dart';
 import '../screens/quiz_screen.dart';
 import 'challenges_card.dart';
+import 'biodata_dialog.dart';
 
 /// Widget grid untuk menampilkan challenges dengan Provider
 class ChallengesGrid extends StatefulWidget {
@@ -66,24 +68,23 @@ class _ChallengesGridState extends State<ChallengesGrid> {
           return const Center(child: Text('Tidak ada challenge tersedia'));
         }
 
-        // Success state - show grid
+        // Success state - show single column list
         return Padding(
           padding: const EdgeInsets.all(AppDimensions.paddingM),
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: AppDimensions.marginM,
-              mainAxisSpacing: AppDimensions.marginM,
-              childAspectRatio: 0.8,
-            ),
+          child: ListView.builder(
             itemCount: challengeProvider.challenges.length,
             itemBuilder: (context, index) {
               final challenge = challengeProvider.challenges[index];
-              return ChallengesCard(
-                title: challenge.title,
-                description: challenge.description,
-                imageUrl: challenge.imageUrl,
-                onTap: () => _onChallengeSelected(challenge),
+              return Padding(
+                padding: const EdgeInsets.only(bottom: AppDimensions.marginM),
+                child: ChallengesCard(
+                  title: challenge.title,
+                  description: challenge.description,
+                  imageUrl: challenge.imageUrl,
+                  index:
+                      index, // Menambahkan parameter index untuk variasi warna
+                  onTap: () => _onChallengeSelected(challenge),
+                ),
               );
             },
           ),
@@ -93,9 +94,35 @@ class _ChallengesGridState extends State<ChallengesGrid> {
   }
 
   void _onChallengeSelected(challenge) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => QuizScreen(challenge: challenge)),
-    );
+    final userProvider = context.read<UserProvider>();
+
+    // Check if user is already logged in
+    if (userProvider.isUserLoggedIn) {
+      // User sudah login, langsung ke quiz
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => QuizScreen(challenge: challenge),
+        ),
+      );
+    } else {
+      // User belum login, tampilkan biodata dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder:
+            (context) => BiodataDialog(
+              onSuccess: () {
+                // Setelah berhasil register, ke quiz screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => QuizScreen(challenge: challenge),
+                  ),
+                );
+              },
+            ),
+      );
+    }
   }
 }
