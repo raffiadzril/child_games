@@ -355,38 +355,200 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
   }
 
   Widget _buildSummary() {
+    final r = widget.reiResult;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Overall summary card
+        ColorfulCard(
+          gradient: const [Color(0xFF667eea), Color(0xFF764ba2)],
+          child: Padding(
+            padding: const EdgeInsets.all(AppDimensions.paddingL),
+            child: Column(
+              children: [
+                Text(
+                  'Kategori Tertinggi',
+                  style: AppFonts.bodyMedium.copyWith(
+                    color: Colors.white.withOpacity(0.9),
+                  ),
+                ),
+                const SizedBox(height: AppDimensions.marginS),
+                Text(
+                  r.highestCategory,
+                  style: AppFonts.headlineMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: AppDimensions.marginS),
+                Text(
+                  'Total Skor: ${r.totalScore}',
+                  style: AppFonts.bodyLarge.copyWith(
+                    color: Colors.white.withOpacity(0.9),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if ((r.allCategory ?? r.labelAnakRamahCategory) != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppDimensions.marginM),
+                    child: Text(
+                      (r.allCategory ?? r.labelAnakRamahCategory)!,
+                      style: AppFonts.labelLarge.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                if (r.allNote != null && r.allNote!.trim().isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppDimensions.marginS),
+                    child: Text(
+                      r.allNote!,
+                      style: AppFonts.bodyMedium.copyWith(
+                        color: Colors.white.withOpacity(0.92),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: AppDimensions.marginL),
+
+        // Category details grid
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isNarrow = constraints.maxWidth < 600;
+            final children = <Widget>[
+              _buildCategoryDetailCard(
+                title: 'Respect',
+                gradient: const [Color(0xFF6B73FF), Color(0xFF9BA3FF)],
+                category: r.respectCategory,
+                note: r.respectNote,
+                label: r.labelAnakRamahCategoryRespect,
+                icon: Icons.favorite,
+              ),
+              _buildCategoryDetailCard(
+                title: 'Equity',
+                gradient: const [Color(0xFF4ECDC4), Color(0xFF44A08D)],
+                category: r.equityCategory,
+                note: r.equityNote,
+                label: r.labelAnakRamahCategoryEquity,
+                icon: Icons.balance,
+              ),
+              _buildCategoryDetailCard(
+                title: 'Inclusion',
+                gradient: const [Color(0xFFFF9F43), Color(0xFFFFD93D)],
+                category: r.inclusionCategory,
+                note: r.inclusionNote,
+                label: r.labelAnakRamahCategoryInclusion,
+                icon: Icons.group,
+              ),
+            ];
+
+            if (isNarrow) {
+              return Column(
+                children: [
+                  for (int i = 0; i < children.length; i++) ...[
+                    children[i],
+                    if (i < children.length - 1)
+                      const SizedBox(height: AppDimensions.marginM),
+                  ],
+                ],
+              );
+            }
+
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: children[0]),
+                const SizedBox(width: AppDimensions.marginM),
+                Expanded(child: children[1]),
+                const SizedBox(width: AppDimensions.marginM),
+                Expanded(child: children[2]),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategoryDetailCard({
+    required String title,
+    required List<Color> gradient,
+    required IconData icon,
+    String? category,
+    String? label,
+    String? note,
+  }) {
     return ColorfulCard(
-      gradient: const [Color(0xFF667eea), Color(0xFF764ba2)],
+      gradient: gradient,
       child: Padding(
-        padding: const EdgeInsets.all(AppDimensions.paddingL),
+        padding: const EdgeInsets.all(AppDimensions.paddingM),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Kategori Tertinggi',
-              style: AppFonts.bodyMedium.copyWith(
-                color: Colors.white.withOpacity(0.9),
-              ),
+            Row(
+              children: [
+                Icon(icon, color: Colors.white),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: AppFonts.titleMedium.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: AppDimensions.marginS),
-
-            Text(
-              widget.reiResult.highestCategory,
-              style: AppFonts.headlineMedium.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            if (label != null && label.trim().isNotEmpty) ...[
+              const SizedBox(height: AppDimensions.marginS),
+              Text(
+                label,
+                style: AppFonts.labelLarge.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-
-            const SizedBox(height: AppDimensions.marginS),
-
-            Text(
-              'Total Skor: ${widget.reiResult.totalScore}',
-              style: AppFonts.bodyLarge.copyWith(
-                color: Colors.white.withOpacity(0.9),
-                fontWeight: FontWeight.w500,
+            ],
+            if (category != null && category.trim().isNotEmpty) ...[
+              const SizedBox(height: AppDimensions.marginXS),
+              _buildPill(category),
+            ],
+            if (note != null && note.trim().isNotEmpty) ...[
+              const SizedBox(height: AppDimensions.marginS),
+              Text(
+                note,
+                style: AppFonts.bodyMedium.copyWith(
+                  color: Colors.white.withOpacity(0.95),
+                ),
               ),
-            ),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPill(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.paddingS,
+        vertical: 6,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.18),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        text,
+        style: AppFonts.labelMedium.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

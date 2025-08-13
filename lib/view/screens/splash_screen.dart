@@ -101,6 +101,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _startLoadingSequence() async {
     try {
+      final start = DateTime.now();
       // Start all animations simultaneously for faster loading
       _logoController.forward();
       _textController.forward();
@@ -108,7 +109,7 @@ class _SplashScreenState extends State<SplashScreen>
       _particleController.repeat();
 
       // Minimal delay before starting data load
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 150));
 
       // Load application data with very short timeout
       try {
@@ -128,7 +129,12 @@ class _SplashScreenState extends State<SplashScreen>
         }
       }
 
-      // Immediate navigation
+      // Ensure splash is visible for about 5 seconds in total from start
+      final elapsed = DateTime.now().difference(start).inMilliseconds;
+      final remain = 5000 - elapsed;
+      if (remain > 0) {
+        await Future.delayed(Duration(milliseconds: remain));
+      }
       _navigateToHome();
     } catch (e) {
       print('Critical error in splash sequence: $e');
