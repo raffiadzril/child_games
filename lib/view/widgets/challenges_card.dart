@@ -193,7 +193,7 @@ class _ChallengesCardState extends State<ChallengesCard>
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'Main',
+                                'Mulai',
                                 style: AppFonts.labelMedium.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,

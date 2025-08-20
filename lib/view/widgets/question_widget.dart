@@ -357,7 +357,7 @@ class _QuestionWidgetState extends State<QuestionWidget>
                       option.imageUrl!,
                       width: 72,
                       height: 72,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
                         return Container(
@@ -406,7 +406,14 @@ class _QuestionWidgetState extends State<QuestionWidget>
                       child: Material(
                         color: Colors.transparent,
                         borderRadius: BorderRadius.circular(AppRadius.radiusS),
-                        child: img,
+                        child: Container(
+                          padding: const EdgeInsets.all(4.0),
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(AppRadius.radiusS),
+                          ),
+                          child: img,
+                        ),
                       ),
                     ),
                   );
@@ -515,15 +522,15 @@ class _QuestionWidgetState extends State<QuestionWidget>
           return FadeTransition(
             opacity: animation,
             child: ScaleTransition(
-              scale: Tween<double>(begin: 0.3, end: 1.0).animate(
-                CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+              scale: Tween<double>(begin: 0.0, end: 1.0).animate(
+                CurvedAnimation(parent: animation, curve: Curves.elasticOut),
               ),
               child: child,
             ),
           );
         },
-        transitionDuration: const Duration(milliseconds: 600),
-        reverseTransitionDuration: const Duration(milliseconds: 400),
+        transitionDuration: const Duration(milliseconds: 1000),
+        reverseTransitionDuration: const Duration(milliseconds: 600),
       ),
     ).then((_) {
       // Reset popup state when navigation completes
@@ -557,8 +564,8 @@ class _QuestionWidgetState extends State<QuestionWidget>
                 child: Material(
                   color: Colors.transparent,
                   child: Container(
-                    width: 280,
-                    height: 280,
+                    width: 320,
+                    height: 320,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(AppRadius.radiusL),
                       boxShadow: [
@@ -572,10 +579,13 @@ class _QuestionWidgetState extends State<QuestionWidget>
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(AppRadius.radiusL),
-                      child: Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        color: Colors.transparent,
+                        child: Image.network(
+                          imageUrl,
+                          fit: BoxFit.contain,
+                          loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) return child;
                           return Container(
                             color: AppColors.backgroundSecondary,
@@ -594,6 +604,7 @@ class _QuestionWidgetState extends State<QuestionWidget>
                             ),
                           );
                         },
+                        ),
                       ),
                     ),
                   ),
