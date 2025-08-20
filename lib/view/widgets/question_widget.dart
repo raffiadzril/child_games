@@ -35,7 +35,7 @@ class _QuestionWidgetState extends State<QuestionWidget>
   final Map<String, AnimationController> _tapControllers = {};
   final Map<String, Animation<double>> _tapScales = {};
   final Map<String, Animation<double>> _tapTilts = {};
-  
+
   // For popup overlay
   bool _isShowingPopup = false;
 
@@ -51,8 +51,8 @@ class _QuestionWidgetState extends State<QuestionWidget>
     _initializeOptionAnimations();
     _optionsController.forward();
 
-  // Initialize tap animations for current options
-  _initializeTapAnimations(widget.options);
+    // Initialize tap animations for current options
+    _initializeTapAnimations(widget.options);
   }
 
   void _initializeOptionAnimations() {
@@ -98,13 +98,15 @@ class _QuestionWidgetState extends State<QuestionWidget>
         duration: const Duration(milliseconds: 400),
         reverseDuration: const Duration(milliseconds: 300),
       );
-      final scale = Tween<double>(begin: 1.0, end: 1.2).animate(
-        CurvedAnimation(parent: controller, curve: Curves.elasticOut),
-      );
+      final scale = Tween<double>(
+        begin: 1.0,
+        end: 1.2,
+      ).animate(CurvedAnimation(parent: controller, curve: Curves.elasticOut));
       // slight tilt to make it more lively
-      final tilt = Tween<double>(begin: 0.0, end: 0.12).animate(
-        CurvedAnimation(parent: controller, curve: Curves.easeOutBack),
-      );
+      final tilt = Tween<double>(
+        begin: 0.0,
+        end: 0.12,
+      ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOutBack));
       _tapControllers[option.id] = controller;
       _tapScales[option.id] = scale;
       _tapTilts[option.id] = tilt;
@@ -139,8 +141,8 @@ class _QuestionWidgetState extends State<QuestionWidget>
       }
     }
 
-  // Ensure tap animations map stays in sync with options list
-  _initializeTapAnimations(widget.options);
+    // Ensure tap animations map stays in sync with options list
+    _initializeTapAnimations(widget.options);
   }
 
   @override
@@ -301,16 +303,17 @@ class _QuestionWidgetState extends State<QuestionWidget>
             color: isSelected ? AppColors.primary : AppColors.border,
             width: 2,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.25),
-                    blurRadius: 12,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
+          boxShadow:
+              isSelected
+                  ? [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.25),
+                      blurRadius: 12,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                  : null,
           borderRadius: BorderRadius.circular(AppRadius.radiusCard),
         ),
         child: Row(
@@ -346,111 +349,122 @@ class _QuestionWidgetState extends State<QuestionWidget>
 
             // Option content
             Expanded(
-              child: Builder(builder: (context) {
-                final hasText = option.optionText != null;
-                final hasImage = option.imageUrl != null;
+              child: Builder(
+                builder: (context) {
+                  final hasText = option.optionText != null;
+                  final hasImage = option.imageUrl != null;
 
-                Widget buildImage() {
-                  Widget img = ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.radiusS),
-                    child: Image.network(
-                      option.imageUrl!,
-                      width: 72,
-                      height: 72,
-                      fit: BoxFit.contain,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          width: 72,
-                          height: 72,
-                          decoration: BoxDecoration(
-                            color: AppColors.backgroundSecondary,
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.radiusS),
+                  Widget buildImage() {
+                    Widget img = ClipRRect(
+                      borderRadius: BorderRadius.circular(AppRadius.radiusS),
+                      child: Image.network(
+                        option.imageUrl!,
+                        width: 72,
+                        height: 72,
+                        fit: BoxFit.contain,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: AppColors.backgroundSecondary,
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.radiusS,
+                              ),
+                            ),
+                            child: const Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: AppColors.backgroundSecondary,
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.radiusS,
+                              ),
+                              border: Border.all(color: AppColors.border),
+                            ),
+                            child: Icon(
+                              Icons.broken_image,
+                              size: 28,
+                              color: AppColors.textSecondary,
+                            ),
+                          );
+                        },
+                      ),
+                    );
+
+                    // Simple bounce animation for the original image with Hero
+                    return ScaleTransition(
+                      scale:
+                          _tapScales[option.id] ??
+                          const AlwaysStoppedAnimation<double>(1.0),
+                      child: Hero(
+                        tag: 'popup-image-${option.imageUrl!}',
+                        child: Material(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(
+                            AppRadius.radiusS,
                           ),
-                          child: const Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                          child: Container(
+                            padding: const EdgeInsets.all(4.0),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.radiusS,
+                              ),
+                            ),
+                            child: img,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
+                  if (hasText && hasImage) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        buildImage(),
+                        const SizedBox(width: AppDimensions.marginM),
+                        Expanded(
+                          child: Text(
+                            option.optionText!,
+                            style: AppFonts.bodyMedium.copyWith(
+                              color: AppColors.textPrimary,
                             ),
                           ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: 72,
-                          height: 72,
-                          decoration: BoxDecoration(
-                            color: AppColors.backgroundSecondary,
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.radiusS),
-                            border: Border.all(color: AppColors.border),
-                          ),
-                          child: Icon(
-                            Icons.broken_image,
-                            size: 28,
-                            color: AppColors.textSecondary,
-                          ),
-                        );
-                      },
-                    ),
-                  );
-
-                  // Simple bounce animation for the original image with Hero
-                  return ScaleTransition(
-                    scale: _tapScales[option.id] ?? 
-                        const AlwaysStoppedAnimation<double>(1.0),
-                    child: Hero(
-                      tag: 'popup-image-${option.imageUrl!}',
-                      child: Material(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(AppRadius.radiusS),
-                        child: Container(
-                          padding: const EdgeInsets.all(4.0),
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(AppRadius.radiusS),
-                          ),
-                          child: img,
                         ),
+                      ],
+                    );
+                  } else if (hasText) {
+                    return Text(
+                      option.optionText!,
+                      style: AppFonts.bodyMedium.copyWith(
+                        color: AppColors.textPrimary,
                       ),
-                    ),
-                  );
-                }
-
-                if (hasText && hasImage) {
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      buildImage(),
-                      const SizedBox(width: AppDimensions.marginM),
-                      Expanded(
-                        child: Text(
-                          option.optionText!,
-                          style: AppFonts.bodyMedium.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                } else if (hasText) {
-                  return Text(
-                    option.optionText!,
-                    style: AppFonts.bodyMedium.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                  );
-                } else if (hasImage) {
-                  return Align(
-                    alignment: Alignment.centerLeft,
-                    child: buildImage(),
-                  );
-                } else {
-                  return const SizedBox.shrink();
-                }
-              }),
+                    );
+                  } else if (hasImage) {
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: buildImage(),
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
+              ),
             ),
           ],
         ),
@@ -476,20 +490,19 @@ class _QuestionWidgetState extends State<QuestionWidget>
   void _triggerBounce(String optionId) async {
     final controller = _tapControllers[optionId];
     if (controller == null) return;
-    
+
     try {
       // Start small bounce animation first
       controller.forward(from: 0.0);
-      
+
       // Small delay then show popup with Hero transition
       await Future.delayed(const Duration(milliseconds: 100));
       if (!mounted) return;
-      
+
       _showImagePopup(optionId);
-      
+
       // Keep popup visible for viewing
       await Future.delayed(const Duration(milliseconds: 2000));
-      
     } catch (_) {
       // ignore animation errors if disposed mid-flight
     } finally {
@@ -504,43 +517,53 @@ class _QuestionWidgetState extends State<QuestionWidget>
 
   void _showImagePopup(String optionId) {
     if (_isShowingPopup) return;
-    
+
     final option = widget.options.firstWhere((opt) => opt.id == optionId);
     if (option.imageUrl == null) return;
-    
+
     _isShowingPopup = true;
-    
+
     // Use Navigator for smooth Hero transition
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        opaque: false, // Allows background to show through
-        barrierDismissible: true,
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return _buildPopupPage(option.imageUrl!);
-        },
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: ScaleTransition(
-              scale: Tween<double>(begin: 0.0, end: 1.0).animate(
-                CurvedAnimation(parent: animation, curve: Curves.elasticOut),
-              ),
-              child: child,
-            ),
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 1000),
-        reverseTransitionDuration: const Duration(milliseconds: 600),
-      ),
-    ).then((_) {
-      // Reset popup state when navigation completes
-      _isShowingPopup = false;
-    });
+    Navigator.of(context)
+        .push(
+          PageRouteBuilder(
+            opaque: false, // Allows background to show through
+            barrierDismissible: true,
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return _buildPopupPage(option.imageUrl!);
+            },
+            transitionsBuilder: (
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+            ) {
+              return FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(
+                  scale: Tween<double>(begin: 0.0, end: 1.0).animate(
+                    CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.elasticOut,
+                    ),
+                  ),
+                  child: child,
+                ),
+              );
+            },
+            transitionDuration: const Duration(milliseconds: 1000),
+            reverseTransitionDuration: const Duration(milliseconds: 600),
+          ),
+        )
+        .then((_) {
+          // Reset popup state when navigation completes
+          _isShowingPopup = false;
+        });
   }
 
   void _hideImagePopup() {
     if (!_isShowingPopup) return;
-    
+
     if (Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
     }
@@ -586,24 +609,24 @@ class _QuestionWidgetState extends State<QuestionWidget>
                           imageUrl,
                           fit: BoxFit.contain,
                           loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            color: AppColors.backgroundSecondary,
-                            child: const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: AppColors.backgroundSecondary,
-                            child: Icon(
-                              Icons.broken_image,
-                              size: 64,
-                              color: AppColors.textSecondary,
-                            ),
-                          );
-                        },
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              color: AppColors.backgroundSecondary,
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: AppColors.backgroundSecondary,
+                              child: Icon(
+                                Icons.broken_image,
+                                size: 64,
+                                color: AppColors.textSecondary,
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
