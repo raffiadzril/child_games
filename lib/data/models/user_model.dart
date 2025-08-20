@@ -10,6 +10,7 @@ class UserModel extends BaseModel {
   final int age;
   final String
   className; // Menggunakan className karena class adalah reserved word
+  final String school; // Nama sekolah
   final String role; // Auto set ke 'murid'
   @override
   final DateTime createdAt;
@@ -22,6 +23,7 @@ class UserModel extends BaseModel {
     required this.gender,
     required this.age,
     required this.className,
+    required this.school,
     this.role = 'murid',
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -36,6 +38,7 @@ class UserModel extends BaseModel {
       gender: json['gender'] as String,
       age: json['age'] as int,
       className: json['class'] as String,
+      school: json['school'] as String? ?? '',
       role: json['role'] as String? ?? 'murid',
       createdAt:
           json['created_at'] != null
@@ -56,6 +59,7 @@ class UserModel extends BaseModel {
       'gender': gender,
       'age': age,
       'class': className,
+      'school': school,
       'role': role,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
@@ -69,6 +73,7 @@ class UserModel extends BaseModel {
     String? gender,
     int? age,
     String? className,
+    String? school,
     String? role,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -79,6 +84,7 @@ class UserModel extends BaseModel {
       gender: gender ?? this.gender,
       age: age ?? this.age,
       className: className ?? this.className,
+      school: school ?? this.school,
       role: role ?? this.role,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -87,7 +93,7 @@ class UserModel extends BaseModel {
 
   @override
   String toString() {
-    return 'UserModel(id: $id, name: $name, gender: $gender, age: $age, className: $className, role: $role)';
+    return 'UserModel(id: $id, name: $name, gender: $gender, age: $age, className: $className, school: $school, role: $role)';
   }
 
   @override
@@ -99,6 +105,7 @@ class UserModel extends BaseModel {
         other.gender == gender &&
         other.age == age &&
         other.className == className &&
+        other.school == school &&
         other.role == role;
   }
 
@@ -109,6 +116,7 @@ class UserModel extends BaseModel {
         gender.hashCode ^
         age.hashCode ^
         className.hashCode ^
+        school.hashCode ^
         role.hashCode;
   }
 }

@@ -24,6 +24,7 @@ class _BiodataDialogState extends State<BiodataDialog>
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
   final _classController = TextEditingController();
+  final _schoolController = TextEditingController();
 
   String _selectedGender = '';
   bool _isSubmitting = false;
@@ -68,6 +69,7 @@ class _BiodataDialogState extends State<BiodataDialog>
     _nameController.dispose();
     _ageController.dispose();
     _classController.dispose();
+    _schoolController.dispose();
     _slideController.dispose();
     _bounceController.dispose();
     super.dispose();
@@ -112,6 +114,9 @@ class _BiodataDialogState extends State<BiodataDialog>
                       const SizedBox(height: AppDimensions.marginM),
 
                       _buildClassField(),
+                      const SizedBox(height: AppDimensions.marginM),
+
+                      _buildSchoolField(),
                       const SizedBox(height: AppDimensions.marginL),
 
                       // Buttons
@@ -402,6 +407,47 @@ class _BiodataDialogState extends State<BiodataDialog>
     );
   }
 
+  Widget _buildSchoolField() {
+    return TextFormField(
+      controller: _schoolController,
+      decoration: InputDecoration(
+        labelText: 'Sekolah',
+        hintText: 'Contoh: SD Negeri 1, TK Harapan',
+        prefixIcon: const Icon(Icons.location_city, color: Colors.white70),
+        labelStyle: TextStyle(color: Colors.white.withOpacity(0.9)),
+        hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.radiusM),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.radiusM),
+          borderSide: const BorderSide(color: Colors.white, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.radiusM),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.radiusM),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.1),
+      ),
+      style: const TextStyle(color: Colors.white),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'Nama sekolah tidak boleh kosong';
+        }
+        if (value.trim().length < 3) {
+          return 'Nama sekolah minimal 3 karakter';
+        }
+        return null;
+      },
+    );
+  }
+
   Widget _buildButtons() {
     return Row(
       children: [
@@ -500,6 +546,7 @@ class _BiodataDialogState extends State<BiodataDialog>
       gender: _selectedGender,
       age: int.parse(_ageController.text),
       className: _classController.text.trim(),
+      school: _schoolController.text.trim(),
     );
 
     setState(() {

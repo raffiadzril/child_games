@@ -31,6 +31,13 @@ class _QuestionWidgetState extends State<QuestionWidget>
   String? _selectedOptionId;
   late AnimationController _optionsController;
   late List<Animation<double>> _optionAnimations;
+  // Tap bounce animations per option (for image/emoticon)
+  final Map<String, AnimationController> _tapControllers = {};
+  final Map<String, Animation<double>> _tapScales = {};
+  final Map<String, Animation<double>> _tapTilts = {};
+  
+  // For popup overlay
+  bool _isShowingPopup = false;
 
   @override
   void initState() {
@@ -43,6 +50,9 @@ class _QuestionWidgetState extends State<QuestionWidget>
 
     _initializeOptionAnimations();
     _optionsController.forward();
+
+  // Initialize tap animations for current options
+  _initializeTapAnimations(widget.options);
   }
 
   void _initializeOptionAnimations() {
@@ -66,6 +76,38 @@ class _QuestionWidgetState extends State<QuestionWidget>
           ),
         ),
       );
+    }
+  }
+
+  void _initializeTapAnimations(List<OptionModel> options) {
+    // Dispose controllers that are no longer used
+    final existingKeys = _tapControllers.keys.toSet();
+    final newKeys = options.map((o) => o.id).toSet();
+    for (final key in existingKeys.difference(newKeys)) {
+      _tapControllers[key]?.dispose();
+      _tapControllers.remove(key);
+      _tapScales.remove(key);
+      _tapTilts.remove(key);
+    }
+
+    // Create controllers for new options
+    for (final option in options) {
+      if (_tapControllers.containsKey(option.id)) continue;
+      final controller = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 400),
+        reverseDuration: const Duration(milliseconds: 300),
+      );
+      final scale = Tween<double>(begin: 1.0, end: 1.2).animate(
+        CurvedAnimation(parent: controller, curve: Curves.elasticOut),
+      );
+      // slight tilt to make it more lively
+      final tilt = Tween<double>(begin: 0.0, end: 0.12).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeOutBack),
+      );
+      _tapControllers[option.id] = controller;
+      _tapScales[option.id] = scale;
+      _tapTilts[option.id] = tilt;
     }
   }
 
@@ -96,10 +138,17 @@ class _QuestionWidgetState extends State<QuestionWidget>
         }
       }
     }
+
+  // Ensure tap animations map stays in sync with options list
+  _initializeTapAnimations(widget.options);
   }
 
   @override
   void dispose() {
+    // Dispose tap controllers
+    for (final c in _tapControllers.values) {
+      c.dispose();
+    }
     _optionsController.dispose();
     super.dispose();
   }
@@ -252,6 +301,16 @@ class _QuestionWidgetState extends State<QuestionWidget>
             color: isSelected ? AppColors.primary : AppColors.border,
             width: 2,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.25),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
           borderRadius: BorderRadius.circular(AppRadius.radiusCard),
         ),
         child: Row(
@@ -287,84 +346,104 @@ class _QuestionWidgetState extends State<QuestionWidget>
 
             // Option content
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Option text
-                  if (option.optionText != null) ...[
-                    Text(
-                      option.optionText!,
-                      style: AppFonts.bodyMedium.copyWith(
-                        color: AppColors.textPrimary,
+              child: Builder(builder: (context) {
+                final hasText = option.optionText != null;
+                final hasImage = option.imageUrl != null;
+
+                Widget buildImage() {
+                  Widget img = ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadius.radiusS),
+                    child: Image.network(
+                      option.imageUrl!,
+                      width: 72,
+                      height: 72,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          width: 72,
+                          height: 72,
+                          decoration: BoxDecoration(
+                            color: AppColors.backgroundSecondary,
+                            borderRadius:
+                                BorderRadius.circular(AppRadius.radiusS),
+                          ),
+                          child: const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 72,
+                          height: 72,
+                          decoration: BoxDecoration(
+                            color: AppColors.backgroundSecondary,
+                            borderRadius:
+                                BorderRadius.circular(AppRadius.radiusS),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Icon(
+                            Icons.broken_image,
+                            size: 28,
+                            color: AppColors.textSecondary,
+                          ),
+                        );
+                      },
+                    ),
+                  );
+
+                  // Simple bounce animation for the original image with Hero
+                  return ScaleTransition(
+                    scale: _tapScales[option.id] ?? 
+                        const AlwaysStoppedAnimation<double>(1.0),
+                    child: Hero(
+                      tag: 'popup-image-${option.imageUrl!}',
+                      child: Material(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(AppRadius.radiusS),
+                        child: img,
                       ),
                     ),
-                  ],
+                  );
+                }
 
-                  // Option image
-                  if (option.imageUrl != null) ...[
-                    const SizedBox(height: AppDimensions.marginS),
-                    Container(
-                      width: double.infinity,
-                      constraints: const BoxConstraints(maxHeight: 200),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(AppRadius.radiusS),
-                        child: Image.network(
-                          option.imageUrl!,
-                          width: double.infinity,
-                          fit: BoxFit.contain,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              height: 120,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: AppColors.backgroundSecondary,
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.radiusS,
-                                ),
-                              ),
-                              child: const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              height: 120,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: AppColors.backgroundSecondary,
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.radiusS,
-                                ),
-                                border: Border.all(color: AppColors.border),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.broken_image,
-                                    size: 40,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Gambar tidak dapat dimuat',
-                                    style: AppFonts.bodySmall.copyWith(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
+                if (hasText && hasImage) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      buildImage(),
+                      const SizedBox(width: AppDimensions.marginM),
+                      Expanded(
+                        child: Text(
+                          option.optionText!,
+                          style: AppFonts.bodyMedium.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
+                    ],
+                  );
+                } else if (hasText) {
+                  return Text(
+                    option.optionText!,
+                    style: AppFonts.bodyMedium.copyWith(
+                      color: AppColors.textPrimary,
                     ),
-                  ],
-                ],
-              ),
+                  );
+                } else if (hasImage) {
+                  return Align(
+                    alignment: Alignment.centerLeft,
+                    child: buildImage(),
+                  );
+                } else {
+                  return const SizedBox.shrink();
+                }
+              }),
             ),
           ],
         ),
@@ -379,9 +458,152 @@ class _QuestionWidgetState extends State<QuestionWidget>
     await SoundService.instance.playClickSound();
     HapticFeedback.lightImpact();
 
+    // Trigger bounce animation on tapped option (if image exists)
+    _triggerBounce(optionId);
+
     setState(() {
       _selectedOptionId = optionId;
     });
+  }
+
+  void _triggerBounce(String optionId) async {
+    final controller = _tapControllers[optionId];
+    if (controller == null) return;
+    
+    try {
+      // Start small bounce animation first
+      controller.forward(from: 0.0);
+      
+      // Small delay then show popup with Hero transition
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (!mounted) return;
+      
+      _showImagePopup(optionId);
+      
+      // Keep popup visible for viewing
+      await Future.delayed(const Duration(milliseconds: 2000));
+      
+    } catch (_) {
+      // ignore animation errors if disposed mid-flight
+    } finally {
+      // Hide popup and reverse bounce
+      _hideImagePopup();
+      if (mounted) {
+        await Future.delayed(const Duration(milliseconds: 100));
+        await controller.reverse();
+      }
+    }
+  }
+
+  void _showImagePopup(String optionId) {
+    if (_isShowingPopup) return;
+    
+    final option = widget.options.firstWhere((opt) => opt.id == optionId);
+    if (option.imageUrl == null) return;
+    
+    _isShowingPopup = true;
+    
+    // Use Navigator for smooth Hero transition
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false, // Allows background to show through
+        barrierDismissible: true,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return _buildPopupPage(option.imageUrl!);
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.3, end: 1.0).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+              ),
+              child: child,
+            ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 600),
+        reverseTransitionDuration: const Duration(milliseconds: 400),
+      ),
+    ).then((_) {
+      // Reset popup state when navigation completes
+      _isShowingPopup = false;
+    });
+  }
+
+  void _hideImagePopup() {
+    if (!_isShowingPopup) return;
+    
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+    _isShowingPopup = false;
+  }
+
+  Widget _buildPopupPage(String imageUrl) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: GestureDetector(
+        onTap: _hideImagePopup, // Tap to close popup
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: Colors.black.withOpacity(0.7), // Semi-transparent background
+          child: Center(
+            child: GestureDetector(
+              onTap: () {}, // Prevent closing when tapping the image
+              child: Hero(
+                tag: 'popup-image-$imageUrl',
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    width: 280,
+                    height: 280,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppRadius.radiusL),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.4),
+                          blurRadius: 25,
+                          spreadRadius: 8,
+                          offset: const Offset(0, 12),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(AppRadius.radiusL),
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            color: AppColors.backgroundSecondary,
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: AppColors.backgroundSecondary,
+                            child: Icon(
+                              Icons.broken_image,
+                              size: 64,
+                              color: AppColors.textSecondary,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _handleSubmit() async {

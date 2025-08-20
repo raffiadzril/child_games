@@ -29,6 +29,7 @@ class UserProvider extends ChangeNotifier {
     required String gender,
     required int age,
     required String className,
+    required String school,
   }) async {
     _setLoading(true);
     _clearError();
@@ -40,6 +41,7 @@ class UserProvider extends ChangeNotifier {
         gender: gender,
         age: age,
         className: className,
+        school: school,
       );
 
       print('UserProvider: Attempting to register user: ${user.toJson()}');

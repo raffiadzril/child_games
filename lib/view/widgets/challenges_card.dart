@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/constants/radius.dart';
 import 'colorful_card.dart';
+import '../../core/constants/colors.dart';
 
 /// Widget card untuk menampilkan challenge dengan design colorful
 class ChallengesCard extends StatefulWidget {
@@ -137,7 +138,7 @@ class _ChallengesCardState extends State<ChallengesCard>
                   ShaderMask(
                     shaderCallback:
                         (bounds) => const LinearGradient(
-                          colors: [Colors.white, Colors.white70],
+                          colors: [AppColors.accent2, Colors.white70],
                         ).createShader(bounds),
                     child: Text(
                       widget.title,
@@ -156,6 +157,7 @@ class _ChallengesCardState extends State<ChallengesCard>
                     widget.description,
                     style: AppFonts.bodySmall.copyWith(
                       color: Colors.white.withOpacity(0.8),
+                      fontSize: 10.0, // Set to 10px
                     ),
                     textAlign: TextAlign.center,
                   ),
