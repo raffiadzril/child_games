@@ -511,7 +511,7 @@ class _BiodataDialogState extends State<BiodataDialog>
                           ),
                         )
                         : Text(
-                          'Mulai Bermain!',
+                          'Mulai!',
                           style: AppFonts.labelMedium.copyWith(
                             fontWeight: FontWeight.bold,
                           ),

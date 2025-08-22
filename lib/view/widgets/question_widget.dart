@@ -14,12 +14,14 @@ class QuestionWidget extends StatefulWidget {
   final QuestionModel question;
   final List<OptionModel> options;
   final Function(String) onAnswerSelected;
+  final bool isLastQuestion;
 
   const QuestionWidget({
     super.key,
     required this.question,
     required this.options,
     required this.onAnswerSelected,
+    this.isLastQuestion = false,
   });
 
   @override
@@ -268,7 +270,7 @@ class _QuestionWidgetState extends State<QuestionWidget>
                               ),
                             ),
                             child: Text(
-                              'Lanjutkan',
+                              widget.isLastQuestion ? 'Selesai' : 'Lanjutkan',
                               style: AppFonts.gameButton.copyWith(
                                 color: Colors.white,
                               ),
@@ -580,53 +582,60 @@ class _QuestionWidgetState extends State<QuestionWidget>
           height: double.infinity,
           color: Colors.black.withOpacity(0.7), // Semi-transparent background
           child: Center(
-            child: GestureDetector(
-              onTap: () {}, // Prevent closing when tapping the image
-              child: Hero(
-                tag: 'popup-image-$imageUrl',
-                child: Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    width: 320,
-                    height: 320,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(AppRadius.radiusL),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.4),
-                          blurRadius: 25,
-                          spreadRadius: 8,
-                          offset: const Offset(0, 12),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(AppRadius.radiusL),
-                      child: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        color: Colors.transparent,
-                        child: Image.network(
-                          imageUrl,
-                          fit: BoxFit.contain,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              color: AppColors.backgroundSecondary,
-                              child: const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: AppColors.backgroundSecondary,
-                              child: Icon(
-                                Icons.broken_image,
-                                size: 64,
-                                color: AppColors.textSecondary,
-                              ),
-                            );
-                          },
+            child: _ContinuousBounce(
+              child: GestureDetector(
+                onTap: () {}, // Prevent closing when tapping the image
+                child: Hero(
+                  tag: 'popup-image-$imageUrl',
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      width: 320,
+                      height: 320,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppRadius.radiusL),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(
+                              0.2,
+                            ), // Dikurangi dari 0.4 ke 0.2
+                            blurRadius: 15, // Dikurangi dari 25 ke 15
+                            spreadRadius: 3, // Dikurangi dari 8 ke 3
+                            offset: const Offset(
+                              0,
+                              8,
+                            ), // Dikurangi dari 12 ke 8
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(AppRadius.radiusL),
+                        child: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          color: Colors.transparent,
+                          child: Image.network(
+                            imageUrl,
+                            fit: BoxFit.contain,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Container(
+                                color: AppColors.backgroundSecondary,
+                                child: const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: AppColors.backgroundSecondary,
+                                child: Icon(
+                                  Icons.broken_image,
+                                  size: 64,
+                                  color: AppColors.textSecondary,
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -649,5 +658,90 @@ class _QuestionWidgetState extends State<QuestionWidget>
 
     // Langsung proceed ke pertanyaan berikutnya
     widget.onAnswerSelected(_selectedOptionId!);
+  }
+}
+
+// Widget untuk animasi bounce kontinu
+class _ContinuousBounce extends StatefulWidget {
+  final Widget child;
+
+  const _ContinuousBounce({required this.child});
+
+  @override
+  State<_ContinuousBounce> createState() => __ContinuousBounceState();
+}
+
+class __ContinuousBounceState extends State<_ContinuousBounce>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _bounceAnimation;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(
+        milliseconds: 600,
+      ), // Lebih cepat untuk bounce yang natural
+      vsync: this,
+    );
+
+    // Animasi untuk gerakan naik-turun dengan curve yang lebih smooth
+    _bounceAnimation = Tween<double>(
+      begin: 0.0,
+      end: -30.0, // Bounce lebih tinggi
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeOutQuart, // Curve yang lebih smooth
+      ),
+    );
+
+    // Animasi scale dengan efek squash yang lebih natural
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.9, // Sedikit mengecil saat naik (seperti bola tertekan)
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOutSine, // Curve yang smooth untuk scale
+      ),
+    );
+
+    _startBouncing();
+  }
+
+  void _startBouncing() {
+    // Menggunakan animasi yang terus berulang dengan smooth transition
+    _controller.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        // Kombinasi transform untuk efek bounce yang realistis
+        return Transform.translate(
+          offset: Offset(0, _bounceAnimation.value),
+          child: Transform.scale(
+            scaleY:
+                _scaleAnimation.value, // Hanya scale vertikal untuk efek squash
+            scaleX:
+                1.0 +
+                (1.0 - _scaleAnimation.value) *
+                    0.1, // Sedikit stretch horizontal
+            child: widget.child,
+          ),
+        );
+      },
+    );
   }
 }

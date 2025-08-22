@@ -366,27 +366,14 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
             padding: const EdgeInsets.all(AppDimensions.paddingL),
             child: Column(
               children: [
-                Text(
-                  'Kategori Tertinggi',
-                  style: AppFonts.bodyMedium.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                  ),
-                ),
                 const SizedBox(height: AppDimensions.marginS),
                 Text(
-                  r.highestCategory,
-                  style: AppFonts.headlineMedium.copyWith(
+                  'SKOR REI\n${r.totalScore}',
+                  style: AppFonts.displayMedium.copyWith(
+                    color: Colors.white.withOpacity(0.9),
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
                   ),
-                ),
-                const SizedBox(height: AppDimensions.marginS),
-                Text(
-                  'Total Skor: ${r.totalScore}',
-                  style: AppFonts.bodyLarge.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                    fontWeight: FontWeight.w500,
-                  ),
+                  textAlign: TextAlign.center,
                 ),
                 if ((r.allCategory ?? r.labelAnakRamahCategory) != null)
                   Padding(
@@ -411,6 +398,20 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
                       textAlign: TextAlign.center,
                     ),
                   ),
+                Text(
+                  'Kategori Tertinggi',
+                  style: AppFonts.bodyMedium.copyWith(
+                    color: Colors.white.withOpacity(0.9),
+                  ),
+                ),
+                const SizedBox(height: AppDimensions.marginS),
+                Text(
+                  r.highestCategory,
+                  style: AppFonts.headlineMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               ],
             ),
           ),

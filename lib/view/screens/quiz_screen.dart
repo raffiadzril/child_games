@@ -154,6 +154,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                               ),
                               question: quizProvider.currentQuestion!,
                               options: quizProvider.currentOptions!,
+                              isLastQuestion: quizProvider.isLastQuestion,
                               onAnswerSelected: (optionId) async {
                                 if (mounted) {
                                   final userProvider =

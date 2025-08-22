@@ -329,7 +329,7 @@ class _SplashScreenState extends State<SplashScreen>
                     colors: AppColors.gradientPrimary,
                   ).createShader(bounds),
               child: Text(
-                'Child Games',
+                'Respect, Equity, & Inclusion',
                 style: AppFonts.displayLarge.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
