@@ -1,6 +1,6 @@
-# Child Games App
+# REI
 
-Aplikasi game edukasi untuk anak-anak yang dibangun dengan Flutter dan Supabase.
+Aplikasi edukasi untuk anak-anak yang dibangun dengan Flutter dan Supabase. (Display name: REI)
 
 ## 🎯 Fitur Utama
 

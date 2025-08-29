@@ -14,11 +14,17 @@ Future<void> main() async {
   // Clean up any existing sound service instances first
   await SoundService.globalCleanup();
 
-  await Supabase.initialize(
-    url: 'https://jokvxdrxswytjjhxuhvk.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impva3Z4ZHJ4c3d5dGpqaHh1aHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM0MzMwMjIsImV4cCI6MjA2OTAwOTAyMn0.hKilH2syHkxQOnAQ8TlPB7sJOCDRihxzNqv-3MzXgPU',
-  );
+  try {
+    await Supabase.initialize(
+      url: 'https://jokvxdrxswytjjhxuhvk.supabase.co',
+      anonKey:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impva3Z4ZHJ4c3d5dGpqaHh1aHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM0MzMwMjIsImV4cCI6MjA2OTAwOTAyMn0.hKilH2syHkxQOnAQ8TlPB7sJOCDRihxzNqv-3MzXgPU',
+    );
+    print('✅ Supabase initialized successfully');
+  } catch (e) {
+    print('❌ Error initializing Supabase: $e');
+    // Continue with app even if Supabase fails
+  }
 
   // Initialize sound service
   await SoundService.instance.initialize();
@@ -105,7 +111,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ),
       ],
       child: MaterialApp(
-        title: 'Child Games',
+        title: 'REI',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         home: const SplashScreen(),

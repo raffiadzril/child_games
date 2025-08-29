@@ -59,8 +59,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        // Lower music volume for quiz session with smooth fade
-        SoundService.instance.lowerVolumeForQuiz();
+        // Stop music completely for quiz session
+        SoundService.instance.stopBackgroundMusic();
 
         // Reset REI result untuk quiz baru
         context.read<UserProvider>().resetReiResult();
@@ -77,10 +77,10 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
     _progressController.forward();
   }
 
-  /// Handle navigation back with volume fade
+  /// Handle navigation back with music restart
   Future<void> _navigateBack() async {
-    // Restore normal music volume with fade before leaving
-    await SoundService.instance.restoreNormalVolume();
+    // Restart music when leaving quiz
+    await SoundService.instance.startBackgroundMusic();
 
     if (mounted) {
       Navigator.pop(context);
@@ -419,6 +419,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
           _hasLoadedReiResult = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             userProvider.loadReiResult();
+            // Start music again when quiz is completed and showing result
+            SoundService.instance.startBackgroundMusic();
           });
         }
 

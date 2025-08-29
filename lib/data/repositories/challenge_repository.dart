@@ -8,9 +8,12 @@ class ChallengeRepository {
   /// Get all challenges dari table 'challenges'
   Future<List<ChallengeModel>> getAllChallenges() async {
     try {
+      print('🔄 Attempting to fetch challenges from database...');
       final response = await _supabaseService.select('challenges');
+      print('✅ Successfully fetched ${response.length} challenges');
       return response.map((json) => ChallengeModel.fromJson(json)).toList();
     } catch (e) {
+      print('❌ Error fetching challenges: $e');
       return [];
     }
   }

@@ -1,6 +1,6 @@
 {
-    "name": "child_games",
-    "short_name": "child_games",
+    "name": "REI",
+    "short_name": "REI",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
