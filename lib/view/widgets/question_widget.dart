@@ -175,13 +175,16 @@ class _QuestionWidgetState extends State<QuestionWidget>
             const SizedBox(height: AppDimensions.marginL),
           ],
 
-          // Question text
-          Text(
-            widget.question.questionText,
-            style: AppFonts.headlineMedium.copyWith(
-              color: AppColors.textPrimary,
+            // Question text
+            Center(
+              child: Text(
+                widget.question.questionText,
+                style: AppFonts.headlineLarge.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-          ),
           const SizedBox(height: AppDimensions.marginL),
 
           // Options dengan conditional animation - menggunakan Column agar semua terlihat

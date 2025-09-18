@@ -93,9 +93,7 @@ class _QuestionMediaWidgetState extends State<QuestionMediaWidget> {
     return Container(
       height: widget.height ?? 200,
       width: widget.width ?? double.infinity,
-      decoration: const BoxDecoration(
-        color: Colors.transparent,
-      ),
+      decoration: const BoxDecoration(color: Colors.transparent),
       child: _buildMediaContent(),
     );
   }

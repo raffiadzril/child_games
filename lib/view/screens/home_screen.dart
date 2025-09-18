@@ -137,7 +137,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               height: 50,
                               fit: BoxFit.contain,
                               errorBuilder: (context, error, stackTrace) {
-                                return const Icon(Icons.games, size: 28, color: Colors.grey);
+                                return const Icon(
+                                  Icons.games,
+                                  size: 28,
+                                  color: Colors.grey,
+                                );
                               },
                             ),
                           ),

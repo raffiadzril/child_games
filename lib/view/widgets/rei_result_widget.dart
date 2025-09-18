@@ -181,31 +181,38 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
   }
 
   Widget _buildScoreCards() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildScoreCard('Respect', widget.reiResult.respect, const [
-            Color(0xFF6B73FF),
-            Color(0xFF9BA3FF),
-          ], Icons.favorite),
-        ),
-        const SizedBox(width: AppDimensions.marginM),
-        Expanded(
-          child: _buildScoreCard('Equity', widget.reiResult.equity, const [
-            Color(0xFF4ECDC4),
-            Color(0xFF44A08D),
-          ], Icons.balance),
-        ),
-        const SizedBox(width: AppDimensions.marginM),
-        Expanded(
-          child: _buildScoreCard(
-            'Inclusion',
-            widget.reiResult.inclusion,
-            const [Color(0xFFFF9F43), Color(0xFFFFD93D)],
-            Icons.group,
+    return IntrinsicHeight(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            flex: 1,
+            child: _buildScoreCard('Respect', widget.reiResult.respect, const [
+              Color(0xFF6B73FF),
+              Color(0xFF9BA3FF),
+            ], Icons.favorite),
           ),
-        ),
-      ],
+          const SizedBox(width: AppDimensions.marginM),
+          Expanded(
+            flex: 1,
+            child: _buildScoreCard('Equity', widget.reiResult.equity, const [
+              Color(0xFF4ECDC4),
+              Color(0xFF44A08D),
+            ], Icons.balance),
+          ),
+          const SizedBox(width: AppDimensions.marginM),
+          Expanded(
+            flex: 1,
+            child: _buildScoreCard(
+              'Inclusion',
+              widget.reiResult.inclusion,
+              const [Color(0xFFFF9F43), Color(0xFFFFD93D)],
+              Icons.group,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -220,25 +227,32 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
       child: Padding(
         padding: const EdgeInsets.all(AppDimensions.paddingM),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(icon, size: 32, color: Colors.white),
-            const SizedBox(height: AppDimensions.marginS),
-            Text(
-              title,
-              style: AppFonts.labelMedium.copyWith(
-                color: Colors.white.withOpacity(0.9),
-                fontWeight: FontWeight.w500,
+            Icon(icon, size: 28, color: Colors.white),
+            const SizedBox(height: 8),
+            Flexible(
+              child: Text(
+                title,
+                style: AppFonts.labelSmall.copyWith(
+                  color: Colors.white.withOpacity(0.9),
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppDimensions.marginXS),
+            const SizedBox(height: 4),
             TweenAnimationBuilder<int>(
               duration: const Duration(milliseconds: 1500),
               tween: IntTween(begin: 0, end: score),
               builder: (context, value, child) {
                 return Text(
                   value.toString(),
-                  style: AppFonts.displaySmall.copyWith(
+                  style: AppFonts.headlineLarge.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
@@ -462,15 +476,18 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
               );
             }
 
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: children[0]),
-                const SizedBox(width: AppDimensions.marginM),
-                Expanded(child: children[1]),
-                const SizedBox(width: AppDimensions.marginM),
-                Expanded(child: children[2]),
-              ],
+            return IntrinsicHeight(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(flex: 1, child: children[0]),
+                  const SizedBox(width: AppDimensions.marginM),
+                  Expanded(flex: 1, child: children[1]),
+                  const SizedBox(width: AppDimensions.marginM),
+                  Expanded(flex: 1, child: children[2]),
+                ],
+              ),
             );
           },
         ),
@@ -492,40 +509,49 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
         padding: const EdgeInsets.all(AppDimensions.paddingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
-                Icon(icon, color: Colors.white),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: AppFonts.titleMedium.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                Icon(icon, color: Colors.white, size: 20),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    title,
+                    style: AppFonts.bodySmall.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
             ),
             if (label != null && label.trim().isNotEmpty) ...[
-              const SizedBox(height: AppDimensions.marginS),
+              const SizedBox(height: 8),
               Text(
                 label,
-                style: AppFonts.labelLarge.copyWith(
+                style: AppFonts.labelMedium.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
             if (category != null && category.trim().isNotEmpty) ...[
-              const SizedBox(height: AppDimensions.marginXS),
+              const SizedBox(height: 6),
               _buildPill(category),
             ],
             if (note != null && note.trim().isNotEmpty) ...[
-              const SizedBox(height: AppDimensions.marginS),
-              Text(
-                note,
-                style: AppFonts.bodyMedium.copyWith(
-                  color: Colors.white.withOpacity(0.95),
+              const SizedBox(height: 8),
+              Flexible(
+                child: Text(
+                  note,
+                  style: AppFonts.bodySmall.copyWith(
+                    color: Colors.white.withOpacity(0.95),
+                  ),
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
