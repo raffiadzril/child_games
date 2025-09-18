@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               colors: [AppColors.primary, AppColors.secondary],
                             ).createShader(bounds),
                         child: Text(
-                          'Respect, Equity, & Inclusion',
+                          'Respect\nEquity\nInclusion',
                           style: AppFonts.headlineLarge.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
