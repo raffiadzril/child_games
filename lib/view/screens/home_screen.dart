@@ -121,9 +121,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             width: 50,
                             height: 50,
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [AppColors.accent1, AppColors.accent3],
-                              ),
+                              color: Colors.transparent,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
@@ -133,10 +131,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 ),
                               ],
                             ),
-                            child: const Icon(
-                              Icons.games,
-                              color: Colors.white,
-                              size: 28,
+                            child: Image.network(
+                              'https://jokvxdrxswytjjhxuhvk.supabase.co/storage/v1/object/public/challenges/logo.png',
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(Icons.games, size: 28, color: Colors.grey);
+                              },
                             ),
                           ),
                         );

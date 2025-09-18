@@ -294,11 +294,7 @@ class _SplashScreenState extends State<SplashScreen>
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: AppColors.gradientPrimary,
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: Colors.transparent,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
@@ -308,7 +304,15 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ],
               ),
-              child: Icon(Icons.games, size: 60, color: Colors.white),
+              child: Image.network(
+                'https://jokvxdrxswytjjhxuhvk.supabase.co/storage/v1/object/public/challenges/logo.png',
+                width: 120,
+                height: 120,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons.games, size: 60, color: Colors.grey);
+                },
+              ),
             ),
           ),
         );

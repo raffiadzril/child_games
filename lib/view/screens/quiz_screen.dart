@@ -351,23 +351,23 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.paddingM,
-                  vertical: AppDimensions.paddingS,
-                ),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: AppColors.gradientPrimary),
-                  borderRadius: BorderRadius.circular(AppRadius.radiusM),
-                ),
-                child: Text(
-                  'Skor: ${quizProvider.score}',
-                  style: AppFonts.labelMedium.copyWith(
-                    color: Colors.white,
-                    fontWeight: AppFonts.semiBold,
-                  ),
-                ),
-              ),
+              // Container(
+              //   padding: const EdgeInsets.symmetric(
+              //     horizontal: AppDimensions.paddingM,
+              //     vertical: AppDimensions.paddingS,
+              //   ),
+              //   decoration: BoxDecoration(
+              //     gradient: LinearGradient(colors: AppColors.gradientPrimary),
+              //     borderRadius: BorderRadius.circular(AppRadius.radiusM),
+              //   ),
+              //   child: Text(
+              //     'Skor: ${quizProvider.score}',
+              //     style: AppFonts.labelMedium.copyWith(
+              //       color: Colors.white,
+              //       fontWeight: AppFonts.semiBold,
+              //     ),
+              //   ),
+              // ),
             ],
           ),
           const SizedBox(height: AppDimensions.marginM),

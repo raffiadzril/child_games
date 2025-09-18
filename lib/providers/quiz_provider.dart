@@ -40,7 +40,8 @@ class QuizProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isQuizCompleted => _isQuizCompleted;
   bool get hasError => _errorMessage != null;
-  bool get isLastQuestion => _currentQuestionIndex >= _questionsWithOptions.length - 1;
+  bool get isLastQuestion =>
+      _currentQuestionIndex >= _questionsWithOptions.length - 1;
 
   /// Load quiz berdasarkan challenge dengan caching
   Future<void> loadQuiz(ChallengeModel challenge) async {

@@ -93,14 +93,10 @@ class _QuestionMediaWidgetState extends State<QuestionMediaWidget> {
     return Container(
       height: widget.height ?? 200,
       width: widget.width ?? double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.grey[100],
+      decoration: const BoxDecoration(
+        color: Colors.transparent,
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: _buildMediaContent(),
-      ),
+      child: _buildMediaContent(),
     );
   }
 
@@ -163,7 +159,7 @@ class _QuestionMediaWidgetState extends State<QuestionMediaWidget> {
 
   Widget _buildNoMediaWidget() {
     return Container(
-      color: Colors.grey[50],
+      color: Colors.transparent,
       child: const Center(
         child: Icon(
           Icons.image_not_supported_outlined,
@@ -176,7 +172,7 @@ class _QuestionMediaWidgetState extends State<QuestionMediaWidget> {
 
   Widget _buildErrorWidget(String message) {
     return Container(
-      color: Colors.grey[100],
+      color: Colors.transparent,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

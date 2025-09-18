@@ -1,0 +1,4 @@
+#Thu Sep 18 16:13:19 GMT+07:00 2025
+base.0=D\:\\kuliah\\gawean\\child-games\\child_games\\build\\app\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex
