@@ -5,7 +5,7 @@
     type="LIBRARY"
     maven="io.flutter.plugins.pathprovider:path_provider_android:1.0-SNAPSHOT"
     agpVersion="8.7.0"
-    buildFolder="D:\kuliah\gawean\child-games\child_games\build\path_provider_android"
+    buildFolder="C:\kuliah\gawean\child-games\child_games\build\path_provider_android"
     bootClassPath="C:\Users\RAFFI\AppData\Local\Android\Sdk\platforms\android-35\android.jar;C:\Users\RAFFI\AppData\Local\Android\Sdk\build-tools\34.0.0\core-lambda-stubs.jar"
     javaSourceLevel="11"
     compileTarget="android-35"

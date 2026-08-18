@@ -4,24 +4,7 @@
             "outputFile": "com.example.child_games.app-mergeReleaseResources-42:/values-th/values-th.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\RAFFI\\.gradle\\caches\\8.10.2\\transforms\\308a2e77faa557d0bd706972416bde6a\\transformed\\browser-1.8.0\\res\\values-th\\values-th.xml",
-                    "from": {
-                        "startLines": "2,3,4,5",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "55,158,257,368",
-                        "endColumns": "102,98,110,97",
-                        "endOffsets": "153,252,363,461"
-                    },
-                    "to": {
-                        "startLines": "37,48,49,50",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "3519,4389,4488,4599",
-                        "endColumns": "102,98,110,97",
-                        "endOffsets": "3617,4483,4594,4692"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\RAFFI\\.gradle\\caches\\8.10.2\\transforms\\3a4dcd3e8c92efa77cfa193b658940d9\\transformed\\appcompat-1.1.0\\res\\values-th\\values-th.xml",
+                    "source": "C:\\Users\\RAFFI\\.gradle\\caches\\8.10.2\\transforms\\845d779a6f9703b804f5e43452bcc2e5\\transformed\\appcompat-1.1.0\\res\\values-th\\values-th.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -38,7 +21,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\RAFFI\\.gradle\\caches\\8.10.2\\transforms\\8cf478dec41eed746328fa8046755ba2\\transformed\\core-1.13.1\\res\\values-th\\values-th.xml",
+                    "source": "C:\\Users\\RAFFI\\.gradle\\caches\\8.10.2\\transforms\\dfc2fbca530748e569b0737b09fa016f\\transformed\\core-1.13.1\\res\\values-th\\values-th.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -55,7 +38,24 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\RAFFI\\.gradle\\caches\\8.10.2\\transforms\\34e8173ce89df20168a3523175f8024b\\transformed\\jetified-media3-exoplayer-1.5.1\\res\\values-th\\values-th.xml",
+                    "source": "C:\\Users\\RAFFI\\.gradle\\caches\\8.10.2\\transforms\\12a085f4af97d8500c9432a48145ea1b\\transformed\\preference-1.2.1\\res\\values-th\\values-th.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8",
+                        "startColumns": "4,4,4,4,4,4,4",
+                        "startOffsets": "105,175,261,341,480,648,728",
+                        "endColumns": "69,85,79,138,167,79,77",
+                        "endOffsets": "170,256,336,475,643,723,801"
+                    },
+                    "to": {
+                        "startLines": "36,47,51,52,55,56,57",
+                        "startColumns": "4,4,4,4,4,4,4",
+                        "startOffsets": "3449,4303,4697,4777,5098,5266,5346",
+                        "endColumns": "69,85,79,138,167,79,77",
+                        "endOffsets": "3514,4384,4772,4911,5261,5341,5419"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\RAFFI\\.gradle\\caches\\8.10.2\\transforms\\d1794756002fa51090b979d820514d2f\\transformed\\jetified-media3-exoplayer-1.5.1\\res\\values-th\\values-th.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10",
                         "startColumns": "4,4,4,4,4,4,4,4,4",
@@ -72,20 +72,20 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\RAFFI\\.gradle\\caches\\8.10.2\\transforms\\0098a6e93522fecc805d8900172003dc\\transformed\\preference-1.2.1\\res\\values-th\\values-th.xml",
+                    "source": "C:\\Users\\RAFFI\\.gradle\\caches\\8.10.2\\transforms\\df22b875ff6a90ec3ebad0ef728bb68b\\transformed\\browser-1.8.0\\res\\values-th\\values-th.xml",
                     "from": {
-                        "startLines": "2,3,4,5,6,7,8",
-                        "startColumns": "4,4,4,4,4,4,4",
-                        "startOffsets": "105,175,261,341,480,648,728",
-                        "endColumns": "69,85,79,138,167,79,77",
-                        "endOffsets": "170,256,336,475,643,723,801"
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,158,257,368",
+                        "endColumns": "102,98,110,97",
+                        "endOffsets": "153,252,363,461"
                     },
                     "to": {
-                        "startLines": "36,47,51,52,55,56,57",
-                        "startColumns": "4,4,4,4,4,4,4",
-                        "startOffsets": "3449,4303,4697,4777,5098,5266,5346",
-                        "endColumns": "69,85,79,138,167,79,77",
-                        "endOffsets": "3514,4384,4772,4911,5261,5341,5419"
+                        "startLines": "37,48,49,50",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "3519,4389,4488,4599",
+                        "endColumns": "102,98,110,97",
+                        "endOffsets": "3617,4483,4594,4692"
                     }
                 }
             ]

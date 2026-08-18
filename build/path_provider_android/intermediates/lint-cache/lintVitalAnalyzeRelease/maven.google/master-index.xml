@@ -39,6 +39,7 @@
   <androidx.compose.material/>
   <androidx.compose.material3/>
   <androidx.compose.material3.adaptive/>
+  <androidx.compose.remote/>
   <androidx.compose.runtime/>
   <androidx.compose.ui/>
   <androidx.concurrent/>
@@ -46,6 +47,7 @@
   <androidx.contentpager/>
   <androidx.coordinatorlayout/>
   <androidx.core/>
+  <androidx.core.locationbutton/>
   <androidx.core.uwb/>
   <androidx.credentials/>
   <androidx.credentials.providerevents/>
@@ -66,6 +68,7 @@
   <androidx.games/>
   <androidx.gaming/>
   <androidx.glance/>
+  <androidx.glance.wear/>
   <androidx.gradle/>
   <androidx.graphics/>
   <androidx.gridlayout/>
@@ -115,6 +118,7 @@
   <androidx.remotecallback/>
   <androidx.resourceinspection/>
   <androidx.room/>
+  <androidx.room3/>
   <androidx.savedstate/>
   <androidx.security/>
   <androidx.sharetarget/>
@@ -143,10 +147,12 @@
   <androidx.viewpager2/>
   <androidx.wear/>
   <androidx.wear.compose/>
+  <androidx.wear.compose.remote/>
   <androidx.wear.protolayout/>
   <androidx.wear.tiles/>
   <androidx.wear.watchface/>
   <androidx.wear.watchfacepush/>
+  <androidx.webgpu/>
   <androidx.webkit/>
   <androidx.window/>
   <androidx.window.extensions.core/>
@@ -154,6 +160,8 @@
   <androidx.xr.arcore/>
   <androidx.xr.compose/>
   <androidx.xr.compose.material3/>
+  <androidx.xr.glimmer/>
+  <androidx.xr.projected/>
   <androidx.xr.runtime/>
   <androidx.xr.scenecore/>
   <com.android/>
@@ -163,6 +171,7 @@
   <com.android.asset-pack/>
   <com.android.asset-pack-bundle/>
   <com.android.billingclient/>
+  <com.android.built-in-kotlin/>
   <com.android.car.setupwizardlib/>
   <com.android.car.ui/>
   <com.android.compose.screenshot/>
@@ -182,6 +191,7 @@
   <com.android.lint/>
   <com.android.ndk.thirdparty/>
   <com.android.privacy-sandbox-sdk/>
+  <com.android.r8/>
   <com.android.reporting/>
   <com.android.security.autorepro/>
   <com.android.security.autorepro.apptest/>
@@ -202,6 +212,7 @@
   <com.android.tools/>
   <com.android.tools.adblib/>
   <com.android.tools.analytics-library/>
+  <com.android.tools.androidtest/>
   <com.android.tools.apkdeployer/>
   <com.android.tools.apkparser/>
   <com.android.tools.build/>
@@ -221,6 +232,7 @@
   <com.android.tools.pixelprobe/>
   <com.android.tools.screenshot/>
   <com.android.tools.smali/>
+  <com.android.tools.studio.leakcanary/>
   <com.android.tools.utp/>
   <com.android.volley/>
   <com.crashlytics.sdk.android/>
@@ -230,6 +242,7 @@
   <com.google.ai.client.generativeai/>
   <com.google.ai.edge.aicore/>
   <com.google.ai.edge.litert/>
+  <com.google.ai.edge.litertlm/>
   <com.google.ai.edge.localagents/>
   <com.google.ambient.crossdevice/>
   <com.google.android.ads/>
@@ -250,6 +263,7 @@
   <com.google.android.instantapps/>
   <com.google.android.instantapps.thirdpartycompat/>
   <com.google.android.libraries.ads.mobile.sdk/>
+  <com.google.android.libraries.bettertogether.fastpair/>
   <com.google.android.libraries.car/>
   <com.google.android.libraries.cloud.telco.subgraph/>
   <com.google.android.libraries.enterprise.amapi/>
@@ -263,6 +277,7 @@
   <com.google.android.libraries.play.games/>
   <com.google.android.libraries.sdkcoroutines/>
   <com.google.android.libraries.searchinapps/>
+  <com.google.android.libraries.verifier/>
   <com.google.android.livesharing/>
   <com.google.android.material/>
   <com.google.android.mdoc/>

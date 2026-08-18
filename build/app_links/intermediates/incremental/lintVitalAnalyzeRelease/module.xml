@@ -5,7 +5,7 @@
     type="LIBRARY"
     maven="com.llfbandit.app_links:app_links:1.0"
     agpVersion="8.7.0"
-    buildFolder="D:\kuliah\gawean\child-games\child_games\build\app_links"
+    buildFolder="C:\kuliah\gawean\child-games\child_games\build\app_links"
     bootClassPath="C:\Users\RAFFI\AppData\Local\Android\Sdk\platforms\android-31\android.jar;C:\Users\RAFFI\AppData\Local\Android\Sdk\build-tools\34.0.0\core-lambda-stubs.jar"
     javaSourceLevel="1.8"
     compileTarget="android-31"
