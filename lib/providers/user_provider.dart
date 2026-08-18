@@ -3,6 +3,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../data/models/user_model.dart';
 import '../data/models/user_answer_model.dart';
 import '../data/models/rei_accumulate_model.dart';
+import '../data/models/question_model.dart';
+import '../data/models/option_model.dart';
 
 /// Provider untuk mengelola data user dan jawaban
 class UserProvider extends ChangeNotifier {
@@ -11,6 +13,7 @@ class UserProvider extends ChangeNotifier {
   String? _errorMessage;
   final List<UserAnswerModel> _userAnswers = [];
   ReiAccumulateModel? _reiResult;
+  String? _selectedAgeCategory; // '<13' atau '>=13'
 
   // Getters
   UserModel? get currentUser => _currentUser;
@@ -20,6 +23,13 @@ class UserProvider extends ChangeNotifier {
   List<UserAnswerModel> get userAnswers => List.unmodifiable(_userAnswers);
   bool get isUserLoggedIn => _currentUser != null;
   ReiAccumulateModel? get reiResult => _reiResult;
+  String? get selectedAgeCategory => _selectedAgeCategory;
+  bool get isAdultMode => _selectedAgeCategory == '>=13';
+
+  void setSelectedAgeCategory(String? category) {
+    _selectedAgeCategory = category;
+    notifyListeners();
+  }
 
   final SupabaseClient _supabase = Supabase.instance.client;
 
@@ -197,6 +207,163 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  /// Calculate REI score & save to Supabase according to REI Update 2026 guidelines
+  Future<ReiAccumulateModel?> calculateAndSaveReiResult({
+    required List<Map<String, dynamic>> questionsWithOptions,
+    required List<String> userAnswers,
+  }) async {
+    if (_currentUser == null) {
+      _setError('User belum login');
+      return null;
+    }
+
+    _setLoading(true);
+
+    try {
+      int respectScore = 0;
+      int equityScore = 0;
+      int inclusionScore = 0;
+      int respectCount = 0;
+      int equityCount = 0;
+      int inclusionCount = 0;
+
+      final totalQuestions = questionsWithOptions.length;
+
+      for (int i = 0; i < totalQuestions && i < userAnswers.length; i++) {
+        final qMap = questionsWithOptions[i];
+        final question = qMap['question'] as QuestionModel;
+        final options = qMap['options'] as List<OptionModel>;
+        final selectedOptId = userAnswers[i];
+
+        final selectedOpt = options.firstWhere(
+          (o) => o.id == selectedOptId,
+          orElse: () => options.first,
+        );
+
+        final score = selectedOpt.scoreOption;
+        final qNum = question.questionNumber;
+
+        if (totalQuestions > 20) {
+          // 45 Questions (Adult 13+): Q1-15 Respect, Q16-30 Equity, Q31-45 Inclusion
+          if (qNum <= 15) {
+            respectScore += score;
+            respectCount++;
+          } else if (qNum <= 30) {
+            equityScore += score;
+            equityCount++;
+          } else {
+            inclusionScore += score;
+            inclusionCount++;
+          }
+        } else {
+          // 15 Questions (Child <13): Q1-5 Respect, Q6-10 Equity, Q11-15 Inclusion
+          if (qNum <= 5) {
+            respectScore += score;
+            respectCount++;
+          } else if (qNum <= 10) {
+            equityScore += score;
+            equityCount++;
+          } else {
+            inclusionScore += score;
+            inclusionCount++;
+          }
+        }
+      }
+
+      final respectMean = respectCount > 0 ? respectScore / respectCount : 0.0;
+      final equityMean = equityCount > 0 ? equityScore / equityCount : 0.0;
+      final inclusionMean =
+          inclusionCount > 0 ? inclusionScore / inclusionCount : 0.0;
+      final overallCount = respectCount + equityCount + inclusionCount;
+      final overallMean = overallCount > 0
+          ? (respectScore + equityScore + inclusionScore) / overallCount
+          : 0.0;
+
+      String determineCategory(double mean) {
+        if (mean <= 2.33) {
+          return 'Rendah';
+        } else if (mean <= 3.67) {
+          return 'Sedang';
+        } else {
+          return 'Tinggi';
+        }
+      }
+
+      final respectCat = determineCategory(respectMean);
+      final equityCat = determineCategory(equityMean);
+      final inclusionCat = determineCategory(inclusionMean);
+      final overallCat = determineCategory(overallMean);
+
+      String getRespectNote(String cat) {
+        switch (cat) {
+          case 'Rendah':
+            return 'Perlu meningkatkan pemahaman dalam menghargai diri sendiri dan orang lain.';
+          case 'Sedang':
+            return 'Cukup baik dalam menghargai diri dan orang lain, tingkatkan konsistensi.';
+          case 'Tinggi':
+          default:
+            return 'Sangat baik dalam menerapkan sikap saling menghargai dan menghormati.';
+        }
+      }
+
+      String getEquityNote(String cat) {
+        switch (cat) {
+          case 'Rendah':
+            return 'Perlu memahami lebih dalam tentang pentingnya keadilan dan dukungan bersama.';
+          case 'Sedang':
+            return 'Memiliki pemahaman keadilan yang cukup baik dalam situasi bermain.';
+          case 'Tinggi':
+          default:
+            return 'Sangat menjunjung tinggi keadilan dan kesetaraan kesempatan bagi semua.';
+        }
+      }
+
+      String getInclusionNote(String cat) {
+        switch (cat) {
+          case 'Rendah':
+            return 'Perlu lebih aktif mengajak dan melibatkan teman tanpa membeda-bedakan.';
+          case 'Sedang':
+            return 'Cukup inklusif dan terbuka terhadap teman dengan latar belakang berbeda.';
+          case 'Tinggi':
+          default:
+            return 'Sangat inklusif, ramah, dan aktif merangkul semua orang dalam kelompok.';
+        }
+      }
+
+      final payload = {
+        'user_id': _currentUser!.id,
+        'respect': respectScore,
+        'equity': equityScore,
+        'inclusion': inclusionScore,
+        'respect_category': respectCat,
+        'equity_category': equityCat,
+        'inclussion_category': inclusionCat,
+        'all_category': overallCat,
+        'respect_note': getRespectNote(respectCat),
+        'equity_note': getEquityNote(equityCat),
+        'inclusion_note': getInclusionNote(inclusionCat),
+        'all_note':
+            'Hasil Evaluasi REI 2026: Kategori $overallCat (Rerata: ${overallMean.toStringAsFixed(2)})',
+        'created_at': DateTime.now().toIso8601String(),
+      };
+
+      print('UserProvider: Saving calculated REI result to Supabase: $payload');
+
+      final response =
+          await _supabase.from('rei_accumulate').upsert(payload).select().single();
+
+      _reiResult = ReiAccumulateModel.fromJson(response);
+      _setLoading(false);
+      notifyListeners();
+      return _reiResult;
+    } catch (e) {
+      print('UserProvider: Error calculating/saving REI result: $e');
+      _setError('Gagal menyimpan hasil REI: $e');
+      _setLoading(false);
+      return null;
+    }
+  }
+
   /// Check if user has REI result
   bool get hasReiResult => _reiResult != null;
 
@@ -211,6 +378,7 @@ class UserProvider extends ChangeNotifier {
     _currentUser = null;
     _userAnswers.clear();
     _reiResult = null;
+    _selectedAgeCategory = null;
     _isLoading = false;
     _errorMessage = null;
     notifyListeners();

@@ -6,6 +6,7 @@ class ChallengeModel extends BaseModel {
   final String title;
   final String description;
   final String? imageUrl;
+  final String? category;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -14,6 +15,7 @@ class ChallengeModel extends BaseModel {
     required this.title,
     required this.description,
     this.imageUrl,
+    this.category,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -24,6 +26,7 @@ class ChallengeModel extends BaseModel {
       title: json['title'] as String,
       description: json['description'] as String,
       imageUrl: json['image_url'] as String?,
+      category: json['category'] as String?,
       createdAt:
           json['created_at'] != null
               ? DateTime.parse(json['created_at'] as String)
@@ -42,6 +45,7 @@ class ChallengeModel extends BaseModel {
       'title': title,
       'description': description,
       'image_url': imageUrl,
+      'category': category,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -53,6 +57,7 @@ class ChallengeModel extends BaseModel {
     String? title,
     String? description,
     String? imageUrl,
+    String? category,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -61,6 +66,7 @@ class ChallengeModel extends BaseModel {
       title: title ?? this.title,
       description: description ?? this.description,
       imageUrl: imageUrl ?? this.imageUrl,
+      category: category ?? this.category,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

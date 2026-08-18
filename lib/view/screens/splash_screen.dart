@@ -7,7 +7,7 @@ import '../../core/constants/radius.dart';
 import '../../core/services/sound_service.dart';
 import '../../providers/challenge_provider.dart';
 import '../widgets/animated_gradient_background.dart';
-import 'home_screen.dart';
+import 'age_selection_screen.dart';
 
 /// Splash Screen dengan animasi menarik dan loading data aplikasi
 class SplashScreen extends StatefulWidget {
@@ -164,7 +164,8 @@ class _SplashScreenState extends State<SplashScreen>
           context,
           PageRouteBuilder(
             pageBuilder:
-                (context, animation, secondaryAnimation) => const HomeScreen(),
+                (context, animation, secondaryAnimation) =>
+                    const AgeSelectionScreen(),
             transitionsBuilder: (
               context,
               animation,

@@ -138,9 +138,85 @@ class QuizProvider extends ChangeNotifier {
       _currentQuestionIndex++;
     } else {
       _isQuizCompleted = true;
+      if (userProvider != null && userProvider.isUserLoggedIn) {
+        userProvider.calculateAndSaveReiResult(
+          questionsWithOptions: _questionsWithOptions,
+          userAnswers: _userAnswers,
+        );
+      }
     }
 
     notifyListeners();
+  }
+
+  /// Developer Mode: Auto-fill all remaining questions
+  Future<void> autoFillAllAnswers({
+    UserProvider? userProvider,
+    String template = 'high',
+  }) async {
+    if (_questionsWithOptions.isEmpty) return;
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final startIdx = _userAnswers.length;
+      final total = _questionsWithOptions.length;
+
+      for (int i = startIdx; i < total; i++) {
+        final options = List<OptionModel>.from(
+          _questionsWithOptions[i]['options'] as List<OptionModel>,
+        );
+        OptionModel selectedOpt;
+
+        if (template == 'high') {
+          options.sort((a, b) => b.scoreOption.compareTo(a.scoreOption));
+          selectedOpt = options.first;
+        } else if (template == 'medium') {
+          selectedOpt = options.firstWhere(
+            (o) => o.scoreOption == 3,
+            orElse: () => options[options.length ~/ 2],
+          );
+        } else {
+          options.shuffle();
+          selectedOpt = options.first;
+        }
+
+        _userAnswers.add(selectedOpt.id);
+        _score += selectedOpt.scoreOption;
+
+        final question =
+            _questionsWithOptions[i]['question'] as QuestionModel;
+        if (userProvider != null && userProvider.isUserLoggedIn) {
+          try {
+            await userProvider.saveUserAnswer(
+              questionId: question.id,
+              selectedOptionId: selectedOpt.id,
+            );
+          } catch (e) {
+            print('AutoFill: failed to save answer for Q${question.questionNumber}: $e');
+          }
+        }
+      }
+
+      _currentQuestionIndex = total - 1;
+      _isQuizCompleted = true;
+
+      if (userProvider != null && userProvider.isUserLoggedIn) {
+        await userProvider.calculateAndSaveReiResult(
+          questionsWithOptions: _questionsWithOptions,
+          userAnswers: _userAnswers,
+        );
+      }
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      print('AutoFill error: $e');
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
   }
 
   /// Reset quiz

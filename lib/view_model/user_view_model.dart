@@ -87,13 +87,13 @@ class UserViewModel extends ChangeNotifier {
     }
   }
 
-  /// Update user score
-  Future<void> updateScore(int score) async {
-    if (_currentUser != null) {
-      final newTotalScore = _currentUser!.totalScore + score;
-      await updateProfile({'total_score': newTotalScore});
-    }
-  }
+  // /// Update user score
+  // Future<void> updateScore(int score) async {
+  //   if (_currentUser != null) {
+  //     final newTotalScore = _currentUser!.totalScore + score;
+  //     await updateProfile({'total_score': newTotalScore});
+  //   }
+  // }
 
  
 

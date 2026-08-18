@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/constants/fonts.dart';
@@ -7,6 +8,7 @@ import '../../core/constants/radius.dart';
 import '../../core/services/sound_service.dart';
 import '../../data/models/question_model.dart';
 import '../../data/models/option_model.dart';
+import '../../providers/user_provider.dart';
 import 'question_media_widget.dart';
 
 /// Widget untuk menampilkan pertanyaan dan opsi jawaban
@@ -159,6 +161,8 @@ class _QuestionWidgetState extends State<QuestionWidget>
 
   @override
   Widget build(BuildContext context) {
+    final isAdultMode = context.watch<UserProvider>().isAdultMode;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppDimensions.paddingM),
       child: Column(
@@ -175,16 +179,17 @@ class _QuestionWidgetState extends State<QuestionWidget>
             const SizedBox(height: AppDimensions.marginL),
           ],
 
-            // Question text
-            Center(
-              child: Text(
-                widget.question.questionText,
-                style: AppFonts.headlineLarge.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
+          // Question text
+          Center(
+            child: Text(
+              widget.question.questionText,
+              style: AppFonts.headlineLarge.copyWith(
+                color: isAdultMode ? const Color(0xFF0F172A) : AppColors.textPrimary,
+                fontWeight: isAdultMode ? FontWeight.bold : FontWeight.w600,
               ),
+              textAlign: TextAlign.center,
             ),
+          ),
           const SizedBox(height: AppDimensions.marginL),
 
           // Options dengan conditional animation - menggunakan Column agar semua terlihat
@@ -194,7 +199,7 @@ class _QuestionWidgetState extends State<QuestionWidget>
 
             // Safety check untuk animasi
             if (index >= _optionAnimations.length) {
-              return _buildOptionCard(option);
+              return _buildOptionCard(option, isAdultMode);
             }
 
             return AnimatedBuilder(
@@ -206,7 +211,7 @@ class _QuestionWidgetState extends State<QuestionWidget>
                     padding: const EdgeInsets.only(
                       bottom: AppDimensions.marginM,
                     ),
-                    child: _buildOptionCard(option),
+                    child: _buildOptionCard(option, isAdultMode),
                   );
                 }
 
@@ -220,13 +225,12 @@ class _QuestionWidgetState extends State<QuestionWidget>
                   padding: const EdgeInsets.only(bottom: AppDimensions.marginM),
                   child: Transform.translate(
                     offset: Offset(
-                      (1 - animationValue) *
-                          50, // Reduced distance for smoother effect
+                      (1 - animationValue) * 50,
                       0,
                     ),
                     child: Opacity(
                       opacity: animationValue,
-                      child: _buildOptionCard(option),
+                      child: _buildOptionCard(option, isAdultMode),
                     ),
                   ),
                 );
@@ -262,7 +266,7 @@ class _QuestionWidgetState extends State<QuestionWidget>
                           child: ElevatedButton(
                             onPressed: _handleSubmit,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
+                              backgroundColor: isAdultMode ? const Color(0xFF4F46E5) : AppColors.primary,
                               padding: const EdgeInsets.symmetric(
                                 vertical: AppDimensions.paddingM,
                               ),
@@ -289,8 +293,18 @@ class _QuestionWidgetState extends State<QuestionWidget>
     );
   }
 
-  Widget _buildOptionCard(OptionModel option) {
+  Widget _buildOptionCard(OptionModel option, bool isAdultMode) {
     final isSelected = _selectedOptionId == option.id;
+
+    final cardBg = isAdultMode
+        ? (isSelected ? const Color(0xFFEEF2FF) : Colors.white)
+        : (isSelected
+            ? AppColors.primary.withValues(alpha: 0.1)
+            : AppColors.backgroundSecondary);
+
+    final borderColor = isAdultMode
+        ? (isSelected ? const Color(0xFF4F46E5) : const Color(0xFFE2E8F0))
+        : (isSelected ? AppColors.primary : AppColors.border);
 
     return InkWell(
       onTap: () => _selectOption(option.id),
@@ -300,25 +314,37 @@ class _QuestionWidgetState extends State<QuestionWidget>
         curve: Curves.easeOut,
         padding: const EdgeInsets.all(AppDimensions.paddingM),
         decoration: BoxDecoration(
-          color:
-              isSelected
-                  ? AppColors.primary.withValues(alpha: 0.1)
-                  : AppColors.backgroundSecondary,
+          color: cardBg,
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-            width: 2,
+            color: borderColor,
+            width: isSelected ? 2 : 1.5,
           ),
-          boxShadow:
-              isSelected
+          boxShadow: isAdultMode
+              ? (isSelected
                   ? [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.25),
-                      blurRadius: 12,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                  : null,
+                      const BoxShadow(
+                        color: Color(0x1F4F46E5),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ]
+                  : [
+                      const BoxShadow(
+                        color: Color(0x08000000),
+                        blurRadius: 4,
+                        offset: Offset(0, 1),
+                      ),
+                    ])
+              : (isSelected
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.25),
+                        blurRadius: 12,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null),
           borderRadius: BorderRadius.circular(AppRadius.radiusCard),
         ),
         child: Row(
@@ -330,20 +356,23 @@ class _QuestionWidgetState extends State<QuestionWidget>
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color:
-                      isSelected
-                          ? AppColors.primary
-                          : AppColors.backgroundPrimary,
+                  color: isAdultMode
+                      ? (isSelected ? const Color(0xFF4F46E5) : const Color(0xFFF1F5F9))
+                      : (isSelected ? AppColors.primary : AppColors.backgroundPrimary),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected ? AppColors.primary : AppColors.border,
+                    color: isAdultMode
+                        ? (isSelected ? const Color(0xFF4F46E5) : const Color(0xFFCBD5E1))
+                        : (isSelected ? AppColors.primary : AppColors.border),
                   ),
                 ),
                 child: Center(
                   child: Text(
                     option.optionLabel!,
                     style: AppFonts.labelMedium.copyWith(
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
+                      color: isAdultMode
+                          ? (isSelected ? Colors.white : const Color(0xFF334155))
+                          : (isSelected ? Colors.white : AppColors.textPrimary),
                       fontWeight: AppFonts.semiBold,
                     ),
                   ),
@@ -447,7 +476,16 @@ class _QuestionWidgetState extends State<QuestionWidget>
                           child: Text(
                             option.optionText!,
                             style: AppFonts.bodyMedium.copyWith(
-                              color: AppColors.textPrimary,
+                              color: isAdultMode
+                                  ? (isSelected
+                                      ? const Color(0xFF1E1B4B)
+                                      : const Color(0xFF0F172A))
+                                  : AppColors.textPrimary,
+                              fontWeight: isAdultMode
+                                  ? (isSelected
+                                      ? FontWeight.w700
+                                      : FontWeight.w500)
+                                  : FontWeight.w500,
                             ),
                           ),
                         ),
@@ -457,7 +495,16 @@ class _QuestionWidgetState extends State<QuestionWidget>
                     return Text(
                       option.optionText!,
                       style: AppFonts.bodyMedium.copyWith(
-                        color: AppColors.textPrimary,
+                        color: isAdultMode
+                            ? (isSelected
+                                ? const Color(0xFF1E1B4B)
+                                : const Color(0xFF0F172A))
+                            : AppColors.textPrimary,
+                        fontWeight: isAdultMode
+                            ? (isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500)
+                            : FontWeight.w500,
                       ),
                     );
                   } else if (hasImage) {

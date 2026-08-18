@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/radius.dart';
 import '../../core/services/sound_service.dart';
 import '../../data/models/rei_accumulate_model.dart';
+import '../../providers/user_provider.dart';
 import 'colorful_card.dart';
 
 /// Widget untuk menampilkan hasil REI (Respect, Equity, Inclusion)
+/// Mendukung Light Theme untuk Mode Dewasa (13+ Tahun)
 class ReiResultWidget extends StatefulWidget {
   final ReiAccumulateModel reiResult;
   final VoidCallback? onContinue;
@@ -59,7 +62,7 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
       CurvedAnimation(parent: _barController, curve: Curves.easeInOutCubic),
     );
 
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
@@ -81,6 +84,8 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
 
   @override
   Widget build(BuildContext context) {
+    final isAdultMode = context.watch<UserProvider>().isAdultMode;
+
     return SlideTransition(
       position: _slideAnimation,
       child: Container(
@@ -88,34 +93,34 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
         child: Column(
           children: [
             // Header dengan animasi pulse
-            _buildHeader(),
+            _buildHeader(isAdultMode),
 
             const SizedBox(height: AppDimensions.marginL),
 
             // Score cards
-            _buildScoreCards(),
+            _buildScoreCards(isAdultMode),
 
             const SizedBox(height: AppDimensions.marginL),
 
             // Progress bars
-            _buildProgressBars(),
+            _buildProgressBars(isAdultMode),
 
             const SizedBox(height: AppDimensions.marginL),
 
             // Summary
-            _buildSummary(),
+            _buildSummary(isAdultMode),
 
             const SizedBox(height: AppDimensions.marginXL),
 
             // Continue button
-            _buildContinueButton(),
+            _buildContinueButton(isAdultMode),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isAdultMode) {
     return AnimatedBuilder(
       animation: _pulseAnimation,
       builder: (context, child) {
@@ -123,53 +128,76 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
           scale: _pulseAnimation.value,
           child: Column(
             children: [
-              // Trophy icon
+              // Trophy / Analytics icon
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primary, AppColors.secondary],
-                  ),
+                  color: isAdultMode
+                      ? const Color(0xFFEEF2FF)
+                      : AppColors.primary,
+                  gradient: isAdultMode
+                      ? null
+                      : const LinearGradient(
+                          colors: [AppColors.primary, AppColors.secondary],
+                        ),
                   shape: BoxShape.circle,
+                  border: isAdultMode
+                      ? Border.all(color: const Color(0xFFC7D2FE), width: 2)
+                      : null,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
+                      color: isAdultMode
+                          ? const Color(0x1F4F46E5)
+                          : AppColors.primary.withOpacity(0.3),
                       blurRadius: 15,
-                      spreadRadius: 5,
+                      spreadRadius: 3,
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.emoji_events,
+                child: Icon(
+                  Icons.assessment_rounded,
                   size: 48,
-                  color: Colors.white,
+                  color: isAdultMode ? const Color(0xFF4F46E5) : Colors.white,
                 ),
               ),
 
               const SizedBox(height: AppDimensions.marginM),
 
               // Title
-              ShaderMask(
-                shaderCallback:
-                    (bounds) => const LinearGradient(
-                      colors: [AppColors.primary, AppColors.secondary],
-                    ).createShader(bounds),
-                child: Text(
-                  'Hasil REI Kamu!',
-                  style: AppFonts.displayMedium.copyWith(
+              if (isAdultMode)
+                Text(
+                  'Hasil Evaluasi REI 13+',
+                  style: AppFonts.headlineLarge.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: const Color(0xFF0F172A),
                   ),
                   textAlign: TextAlign.center,
+                )
+              else
+                ShaderMask(
+                  shaderCallback:
+                      (bounds) => const LinearGradient(
+                        colors: [AppColors.primary, AppColors.secondary],
+                      ).createShader(bounds),
+                  child: Text(
+                    'Hasil REI Kamu!',
+                    style: AppFonts.displayMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
 
               const SizedBox(height: AppDimensions.marginS),
 
               Text(
                 'Respect • Equity • Inclusion',
                 style: AppFonts.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
+                  color: isAdultMode
+                      ? const Color(0xFF475569)
+                      : AppColors.textSecondary,
+                  fontWeight: isAdultMode ? FontWeight.w600 : FontWeight.normal,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -180,7 +208,7 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
     );
   }
 
-  Widget _buildScoreCards() {
+  Widget _buildScoreCards(bool isAdultMode) {
     return IntrinsicHeight(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -188,18 +216,30 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
         children: [
           Expanded(
             flex: 1,
-            child: _buildScoreCard('Respect', widget.reiResult.respect, const [
-              Color(0xFF6B73FF),
-              Color(0xFF9BA3FF),
-            ], Icons.favorite),
+            child: _buildScoreCard(
+              'Respect',
+              widget.reiResult.respect,
+              isAdultMode ? const Color(0xFFFFF1F2) : null,
+              isAdultMode ? const Color(0xFFFECDD3) : null,
+              isAdultMode ? const Color(0xFFBE123C) : Colors.white,
+              const [Color(0xFF6B73FF), Color(0xFF9BA3FF)],
+              Icons.favorite_border_rounded,
+              isAdultMode,
+            ),
           ),
           const SizedBox(width: AppDimensions.marginM),
           Expanded(
             flex: 1,
-            child: _buildScoreCard('Equity', widget.reiResult.equity, const [
-              Color(0xFF4ECDC4),
-              Color(0xFF44A08D),
-            ], Icons.balance),
+            child: _buildScoreCard(
+              'Equity',
+              widget.reiResult.equity,
+              isAdultMode ? const Color(0xFFEFF6FF) : null,
+              isAdultMode ? const Color(0xFFBFDBFE) : null,
+              isAdultMode ? const Color(0xFF1D4ED8) : Colors.white,
+              const [Color(0xFF4ECDC4), Color(0xFF44A08D)],
+              Icons.balance_rounded,
+              isAdultMode,
+            ),
           ),
           const SizedBox(width: AppDimensions.marginM),
           Expanded(
@@ -207,8 +247,12 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
             child: _buildScoreCard(
               'Inclusion',
               widget.reiResult.inclusion,
+              isAdultMode ? const Color(0xFFECFDF5) : null,
+              isAdultMode ? const Color(0xFFA7F3D0) : null,
+              isAdultMode ? const Color(0xFF047857) : Colors.white,
               const [Color(0xFFFF9F43), Color(0xFFFFD93D)],
-              Icons.group,
+              Icons.groups_outlined,
+              isAdultMode,
             ),
           ),
         ],
@@ -219,63 +263,87 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
   Widget _buildScoreCard(
     String title,
     int score,
+    Color? bgColor,
+    Color? borderColor,
+    Color textColor,
     List<Color> gradient,
     IconData icon,
+    bool isAdultMode,
   ) {
-    return ColorfulCard(
-      gradient: gradient,
-      child: Padding(
-        padding: const EdgeInsets.all(AppDimensions.paddingM),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(icon, size: 28, color: Colors.white),
-            const SizedBox(height: 8),
-            Flexible(
-              child: Text(
-                title,
-                style: AppFonts.labelSmall.copyWith(
-                  color: Colors.white.withOpacity(0.9),
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+    final cardContent = Padding(
+      padding: const EdgeInsets.all(AppDimensions.paddingM),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(icon, size: 28, color: textColor),
+          const SizedBox(height: 8),
+          Flexible(
+            child: Text(
+              title,
+              style: AppFonts.labelSmall.copyWith(
+                color: textColor.withOpacity(0.9),
+                fontWeight: FontWeight.w600,
               ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 4),
-            TweenAnimationBuilder<int>(
-              duration: const Duration(milliseconds: 1500),
-              tween: IntTween(begin: 0, end: score),
-              builder: (context, value, child) {
-                return Text(
-                  value.toString(),
-                  style: AppFonts.headlineLarge.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                );
-              },
+          ),
+          const SizedBox(height: 4),
+          TweenAnimationBuilder<int>(
+            duration: const Duration(milliseconds: 1500),
+            tween: IntTween(begin: 0, end: score),
+            builder: (context, value, child) {
+              return Text(
+                value.toString(),
+                style: AppFonts.headlineLarge.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    if (isAdultMode) {
+      return Container(
+        decoration: BoxDecoration(
+          color: bgColor ?? Colors.white,
+          borderRadius: BorderRadius.circular(AppRadius.radiusCard),
+          border: Border.all(color: borderColor ?? const Color(0xFFE2E8F0)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0A000000),
+              blurRadius: 6,
+              offset: Offset(0, 2),
             ),
           ],
         ),
-      ),
+        child: cardContent,
+      );
+    }
+
+    return ColorfulCard(
+      gradient: gradient,
+      child: cardContent,
     );
   }
 
-  Widget _buildProgressBars() {
+  Widget _buildProgressBars(bool isAdultMode) {
     final percentages = widget.reiResult.categoryPercentages;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Distribusi Skor',
+          'Distribusi Skor Dimensi',
           style: AppFonts.headlineSmall.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+            color: isAdultMode ? const Color(0xFF0F172A) : AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: AppDimensions.marginM),
@@ -283,24 +351,27 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
         _buildProgressBar(
           'Respect',
           percentages['respect']! / 100,
-          const Color(0xFF6B73FF),
+          isAdultMode ? const Color(0xFFEC4899) : const Color(0xFF6B73FF),
           widget.reiResult.respect,
+          isAdultMode,
         ),
         const SizedBox(height: AppDimensions.marginM),
 
         _buildProgressBar(
           'Equity',
           percentages['equity']! / 100,
-          const Color(0xFF4ECDC4),
+          isAdultMode ? const Color(0xFF2563EB) : const Color(0xFF4ECDC4),
           widget.reiResult.equity,
+          isAdultMode,
         ),
         const SizedBox(height: AppDimensions.marginM),
 
         _buildProgressBar(
           'Inclusion',
           percentages['inclusion']! / 100,
-          const Color(0xFFFF9F43),
+          isAdultMode ? const Color(0xFF059669) : const Color(0xFFFF9F43),
           widget.reiResult.inclusion,
+          isAdultMode,
         ),
       ],
     );
@@ -311,6 +382,7 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
     double percentage,
     Color color,
     int score,
+    bool isAdultMode,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,14 +393,15 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
             Text(
               label,
               style: AppFonts.bodyMedium.copyWith(
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+                color: isAdultMode ? const Color(0xFF0F172A) : AppColors.textPrimary,
               ),
             ),
             Text(
-              '${(percentage * 100).toStringAsFixed(1)}% ($score)',
+              '${(percentage * 100).toStringAsFixed(1)}% ($score poin)',
               style: AppFonts.bodySmall.copyWith(
-                color: AppColors.textSecondary,
+                color: isAdultMode ? const Color(0xFF475569) : AppColors.textSecondary,
+                fontWeight: isAdultMode ? FontWeight.w500 : FontWeight.normal,
               ),
             ),
           ],
@@ -338,7 +411,7 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
         Container(
           height: 8,
           decoration: BoxDecoration(
-            color: AppColors.backgroundSecondary,
+            color: isAdultMode ? const Color(0xFFE2E8F0) : AppColors.backgroundSecondary,
             borderRadius: BorderRadius.circular(AppRadius.radiusS),
           ),
           child: AnimatedBuilder(
@@ -351,13 +424,6 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
                   decoration: BoxDecoration(
                     color: color,
                     borderRadius: BorderRadius.circular(AppRadius.radiusS),
-                    boxShadow: [
-                      BoxShadow(
-                        color: color.withOpacity(0.3),
-                        blurRadius: 4,
-                        spreadRadius: 1,
-                      ),
-                    ],
                   ),
                 ),
               );
@@ -368,23 +434,27 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
     );
   }
 
-  Widget _buildSummary() {
+  Widget _buildSummary(bool isAdultMode) {
     final r = widget.reiResult;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Overall summary card
-        ColorfulCard(
-          gradient: const [Color(0xFF667eea), Color(0xFF764ba2)],
-          child: Padding(
+        if (isAdultMode)
+          Container(
             padding: const EdgeInsets.all(AppDimensions.paddingL),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEEF2FF),
+              borderRadius: BorderRadius.circular(AppRadius.radiusL),
+              border: Border.all(color: const Color(0xFFC7D2FE)),
+            ),
             child: Column(
               children: [
                 const SizedBox(height: AppDimensions.marginS),
                 Text(
-                  'SKOR REI\n${r.totalScore}',
+                  'TOTAL SKOR EVALUASI\n${r.totalScore}',
                   style: AppFonts.displayMedium.copyWith(
-                    color: Colors.white.withOpacity(0.9),
+                    color: const Color(0xFF1E1B4B),
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
@@ -392,44 +462,94 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
                 if ((r.allCategory ?? r.labelAnakRamahCategory) != null)
                   Padding(
                     padding: const EdgeInsets.only(top: AppDimensions.marginM),
-                    child: Text(
-                      (r.allCategory ?? r.labelAnakRamahCategory)!,
-                      style: AppFonts.labelLarge.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4F46E5),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      textAlign: TextAlign.center,
+                      child: Text(
+                        'Kategori: ${(r.allCategory ?? r.labelAnakRamahCategory)!}',
+                        style: AppFonts.labelLarge.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
                 if (r.allNote != null && r.allNote!.trim().isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.only(top: AppDimensions.marginS),
+                    padding: const EdgeInsets.only(top: AppDimensions.marginM),
                     child: Text(
                       r.allNote!,
                       style: AppFonts.bodyMedium.copyWith(
-                        color: Colors.white.withOpacity(0.92),
+                        color: const Color(0xFF3730A3),
+                        fontWeight: FontWeight.w500,
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                Text(
-                  'Kategori Tertinggi',
-                  style: AppFonts.bodyMedium.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                  ),
-                ),
-                const SizedBox(height: AppDimensions.marginS),
-                Text(
-                  r.highestCategory,
-                  style: AppFonts.headlineMedium.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
               ],
             ),
+          )
+        else
+          ColorfulCard(
+            gradient: const [Color(0xFF667eea), Color(0xFF764ba2)],
+            child: Padding(
+              padding: const EdgeInsets.all(AppDimensions.paddingL),
+              child: Column(
+                children: [
+                  const SizedBox(height: AppDimensions.marginS),
+                  Text(
+                    'SKOR REI\n${r.totalScore}',
+                    style: AppFonts.displayMedium.copyWith(
+                      color: Colors.white.withOpacity(0.9),
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if ((r.allCategory ?? r.labelAnakRamahCategory) != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: AppDimensions.marginM),
+                      child: Text(
+                        (r.allCategory ?? r.labelAnakRamahCategory)!,
+                        style: AppFonts.labelLarge.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  if (r.allNote != null && r.allNote!.trim().isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: AppDimensions.marginS),
+                      child: Text(
+                        r.allNote!,
+                        style: AppFonts.bodyMedium.copyWith(
+                          color: Colors.white.withOpacity(0.92),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  Text(
+                    'Kategori Tertinggi',
+                    style: AppFonts.bodyMedium.copyWith(
+                      color: Colors.white.withOpacity(0.9),
+                    ),
+                  ),
+                  const SizedBox(height: AppDimensions.marginS),
+                  Text(
+                    r.highestCategory,
+                    style: AppFonts.headlineMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
 
         const SizedBox(height: AppDimensions.marginL),
 
@@ -444,7 +564,8 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
                 category: r.respectCategory,
                 note: r.respectNote,
                 label: r.labelAnakRamahCategoryRespect,
-                icon: Icons.favorite,
+                icon: Icons.favorite_border_rounded,
+                isAdultMode: isAdultMode,
               ),
               _buildCategoryDetailCard(
                 title: 'Equity',
@@ -452,7 +573,8 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
                 category: r.equityCategory,
                 note: r.equityNote,
                 label: r.labelAnakRamahCategoryEquity,
-                icon: Icons.balance,
+                icon: Icons.balance_rounded,
+                isAdultMode: isAdultMode,
               ),
               _buildCategoryDetailCard(
                 title: 'Inclusion',
@@ -460,7 +582,8 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
                 category: r.inclusionCategory,
                 note: r.inclusionNote,
                 label: r.labelAnakRamahCategoryInclusion,
-                icon: Icons.group,
+                icon: Icons.groups_outlined,
+                isAdultMode: isAdultMode,
               ),
             ];
 
@@ -499,89 +622,138 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
     required String title,
     required List<Color> gradient,
     required IconData icon,
+    required bool isAdultMode,
     String? category,
     String? label,
     String? note,
   }) {
-    return ColorfulCard(
-      gradient: gradient,
-      child: Padding(
-        padding: const EdgeInsets.all(AppDimensions.paddingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: Colors.white, size: 20),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    title,
-                    style: AppFonts.bodySmall.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            if (label != null && label.trim().isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: AppFonts.labelMedium.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+    final content = Padding(
+      padding: const EdgeInsets.all(AppDimensions.paddingM),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                color: isAdultMode ? const Color(0xFF4F46E5) : Colors.white,
+                size: 20,
               ),
-            ],
-            if (category != null && category.trim().isNotEmpty) ...[
-              const SizedBox(height: 6),
-              _buildPill(category),
-            ],
-            if (note != null && note.trim().isNotEmpty) ...[
-              const SizedBox(height: 8),
+              const SizedBox(width: 6),
               Flexible(
                 child: Text(
-                  note,
+                  title,
                   style: AppFonts.bodySmall.copyWith(
-                    color: Colors.white.withOpacity(0.95),
+                    color: isAdultMode ? const Color(0xFF0F172A) : Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
+          ),
+          if (label != null && label.trim().isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: AppFonts.labelMedium.copyWith(
+                color: isAdultMode ? const Color(0xFF334155) : Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          if (category != null && category.trim().isNotEmpty) ...[
+            const SizedBox(height: 6),
+            _buildPill(category, isAdultMode),
+          ],
+          if (note != null && note.trim().isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Flexible(
+              child: Text(
+                note,
+                style: AppFonts.bodySmall.copyWith(
+                  color: isAdultMode
+                      ? const Color(0xFF475569)
+                      : Colors.white.withOpacity(0.95),
+                ),
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+
+    if (isAdultMode) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppRadius.radiusCard),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0A000000),
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            ),
           ],
         ),
-      ),
+        child: content,
+      );
+    }
+
+    return ColorfulCard(
+      gradient: gradient,
+      child: content,
     );
   }
 
-  Widget _buildPill(String text) {
+  Widget _buildPill(String text, bool isAdultMode) {
+    Color bg = isAdultMode ? const Color(0xFFF1F5F9) : Colors.white.withOpacity(0.18);
+    Color fg = isAdultMode ? const Color(0xFF334155) : Colors.white;
+    Border? border = isAdultMode ? Border.all(color: const Color(0xFFCBD5E1)) : null;
+
+    if (isAdultMode) {
+      if (text == 'Tinggi') {
+        bg = const Color(0xFFD1FAE5);
+        fg = const Color(0xFF065F46);
+        border = Border.all(color: const Color(0xFFA7F3D0));
+      } else if (text == 'Sedang') {
+        bg = const Color(0xFFFEF3C7);
+        fg = const Color(0xFF92400E);
+        border = Border.all(color: const Color(0xFFFDE68A));
+      } else if (text == 'Rendah') {
+        bg = const Color(0xFFFEE2E2);
+        fg = const Color(0xFF991B1B);
+        border = Border.all(color: const Color(0xFFFECACA));
+      }
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.paddingS,
-        vertical: 6,
+        vertical: 4,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.18),
+        color: bg,
         borderRadius: BorderRadius.circular(999),
+        border: border,
       ),
       child: Text(
         text,
         style: AppFonts.labelMedium.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
+          color: fg,
+          fontWeight: FontWeight.bold,
+          fontSize: 11,
         ),
       ),
     );
   }
 
-  Widget _buildContinueButton() {
+  Widget _buildContinueButton(bool isAdultMode) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -593,17 +765,20 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
           }
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: isAdultMode ? const Color(0xFF4F46E5) : AppColors.primary,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.radiusL),
           ),
-          elevation: 4,
+          elevation: 2,
         ),
         child: Text(
-          'Kembali ke Beranda',
-          style: AppFonts.labelLarge.copyWith(fontWeight: FontWeight.bold),
+          'Kembali ke Menu Utama',
+          style: AppFonts.gameButton.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

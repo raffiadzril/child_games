@@ -97,118 +97,256 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundPrimary,
-      appBar: _buildAnimatedAppBar(),
-      body: AnimatedGradientBackground(
-        child: Consumer<QuizProvider>(
-          builder: (context, quizProvider, child) {
-            // Loading state
-            if (quizProvider.isLoading) {
-              return _buildLoadingState();
-            }
+    final isAdultMode = context.watch<UserProvider>().isAdultMode;
+    final bgColor = isAdultMode ? const Color(0xFFF8FAFC) : AppColors.backgroundPrimary;
 
-            // Error state
-            if (quizProvider.hasError) {
-              return _buildErrorState(quizProvider);
-            }
+    final bodyWidget = Consumer<QuizProvider>(
+      builder: (context, quizProvider, child) {
+        // Loading state
+        if (quizProvider.isLoading) {
+          return _buildLoadingState(isAdultMode);
+        }
 
-            // Quiz completed state
-            if (quizProvider.isQuizCompleted) {
-              return _buildQuizResult(quizProvider);
-            }
+        // Error state
+        if (quizProvider.hasError) {
+          return _buildErrorState(quizProvider);
+        }
 
-            // Quiz active state
-            return Column(
-              children: [
-                // Animated Progress bar
-                _buildAnimatedProgressBar(quizProvider),
+        // Quiz completed state
+        if (quizProvider.isQuizCompleted) {
+          return _buildQuizResult(quizProvider);
+        }
 
-                // Animated Question content dengan smooth transition + error handling
-                Expanded(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 500),
-                    transitionBuilder: (
-                      Widget child,
-                      Animation<double> animation,
-                    ) {
-                      return SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(1.0, 0.0),
-                          end: Offset.zero,
-                        ).animate(
-                          CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
+        // Quiz active state
+        return Column(
+          children: [
+            // Animated Progress bar
+            _buildAnimatedProgressBar(quizProvider, isAdultMode),
+
+            // Animated Question content dengan smooth transition + error handling
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                transitionBuilder: (
+                  Widget child,
+                  Animation<double> animation,
+                ) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(1.0, 0.0),
+                      end: Offset.zero,
+                    ).animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
+                      ),
+                    ),
+                    child: FadeTransition(opacity: animation, child: child),
+                  );
+                },
+                child:
+                    quizProvider.currentQuestion != null &&
+                            quizProvider.currentOptions != null
+                        ? QuestionWidget(
+                          key: ValueKey(
+                            '${quizProvider.currentQuestion!.id}_${quizProvider.currentQuestionIndex}',
                           ),
-                        ),
-                        child: FadeTransition(opacity: animation, child: child),
-                      );
-                    },
-                    child:
-                        quizProvider.currentQuestion != null &&
-                                quizProvider.currentOptions != null
-                            ? QuestionWidget(
-                              key: ValueKey(
-                                '${quizProvider.currentQuestion!.id}_${quizProvider.currentQuestionIndex}',
-                              ),
-                              question: quizProvider.currentQuestion!,
-                              options: quizProvider.currentOptions!,
-                              isLastQuestion: quizProvider.isLastQuestion,
-                              onAnswerSelected: (optionId) async {
-                                if (mounted) {
-                                  final userProvider =
-                                      context.read<UserProvider>();
-                                  await quizProvider.submitAnswer(
-                                    optionId,
-                                    userProvider: userProvider,
-                                  );
-                                }
-                              },
-                            )
-                            : const SizedBox.shrink(),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+                          question: quizProvider.currentQuestion!,
+                          options: quizProvider.currentOptions!,
+                          isLastQuestion: quizProvider.isLastQuestion,
+                          onAnswerSelected: (optionId) async {
+                            if (mounted) {
+                              final userProvider =
+                                  context.read<UserProvider>();
+                              await quizProvider.submitAnswer(
+                                optionId,
+                                userProvider: userProvider,
+                              );
+                            }
+                          },
+                        )
+                        : const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    return Scaffold(
+      backgroundColor: bgColor,
+      appBar: _buildAnimatedAppBar(isAdultMode),
+      floatingActionButton: Consumer<QuizProvider>(
+        builder: (context, quizProvider, child) {
+          if (quizProvider.isQuizCompleted || quizProvider.isLoading) {
+            return const SizedBox.shrink();
+          }
+          return FloatingActionButton.extended(
+            onPressed: () => _showDeveloperAutoFillDialog(quizProvider),
+            backgroundColor: const Color(0xFF4F46E5),
+            foregroundColor: Colors.white,
+            icon: const Icon(Icons.bug_report_rounded, size: 20),
+            label: const Text(
+              'DEV: Auto-Fill',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            ),
+          );
+        },
       ),
+      body: isAdultMode
+          ? Container(color: bgColor, child: bodyWidget)
+          : AnimatedGradientBackground(child: bodyWidget),
     );
   }
 
-  PreferredSizeWidget _buildAnimatedAppBar() {
+  void _showDeveloperAutoFillDialog(QuizProvider quizProvider) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E1B4B),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(AppDimensions.paddingL),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.developer_mode_rounded,
+                    color: Color(0xFFA5B4FC),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Developer Mode: Auto-Fill Quiz',
+                    style: AppFonts.titleMedium.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Pilih template jawaban instan untuk menyelesaikan quiz otomatis saat debugging:',
+                style: AppFonts.bodySmall.copyWith(color: Colors.white70),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.star_rounded, color: Colors.amber),
+                title: const Text(
+                  'Serba Tinggi (Max Score)',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: const Text(
+                  'Mengisi semua item dengan nilai tertinggi (5)',
+                  style: TextStyle(color: Colors.white70, fontSize: 11),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  quizProvider.autoFillAllAnswers(
+                    userProvider: context.read<UserProvider>(),
+                    template: 'high',
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.horizontal_rule_rounded,
+                  color: Colors.cyanAccent,
+                ),
+                title: const Text(
+                  'Sedang / Netral (Mean Score)',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: const Text(
+                  'Mengisi semua item dengan nilai sedang (3)',
+                  style: TextStyle(color: Colors.white70, fontSize: 11),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  quizProvider.autoFillAllAnswers(
+                    userProvider: context.read<UserProvider>(),
+                    template: 'medium',
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.shuffle_rounded,
+                  color: Colors.lightGreenAccent,
+                ),
+                title: const Text(
+                  'Random / Acak',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: const Text(
+                  'Mengisi item secara acak',
+                  style: TextStyle(color: Colors.white70, fontSize: 11),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  quizProvider.autoFillAllAnswers(
+                    userProvider: context.read<UserProvider>(),
+                    template: 'random',
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  PreferredSizeWidget _buildAnimatedAppBar(bool isAdultMode) {
     return AppBar(
       title: FadeTransition(
         opacity: _fadeAnimation,
         child: Text(
           widget.challenge.title,
           style: AppFonts.headlineMedium.copyWith(
-            color: AppColors.textPrimary,
+            color: isAdultMode ? const Color(0xFF0F172A) : AppColors.textPrimary,
             fontWeight: AppFonts.semiBold,
           ),
         ),
       ),
-      backgroundColor: AppColors.backgroundPrimary,
+      backgroundColor: isAdultMode ? Colors.white : AppColors.backgroundPrimary,
       elevation: 0,
       centerTitle: true,
       leading: IconButton(
         icon: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.backgroundSecondary,
+            color: isAdultMode ? const Color(0xFFF1F5F9) : AppColors.backgroundSecondary,
             borderRadius: BorderRadius.circular(AppRadius.radiusM),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.shadow,
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            border: isAdultMode ? Border.all(color: const Color(0xFFE2E8F0)) : null,
+            boxShadow: isAdultMode
+                ? null
+                : [
+                  BoxShadow(
+                    color: AppColors.shadow,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
           ),
           child: Icon(
             Icons.arrow_back_ios_new,
-            color: AppColors.textPrimary,
+            color: isAdultMode ? const Color(0xFF334155) : AppColors.textPrimary,
             size: 18,
           ),
         ),
@@ -217,7 +355,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(bool isAdultMode) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -225,25 +363,30 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
           Container(
             padding: const EdgeInsets.all(AppDimensions.paddingXL),
             decoration: BoxDecoration(
-              color: AppColors.backgroundSecondary,
+              color: isAdultMode ? Colors.white : AppColors.backgroundSecondary,
               borderRadius: BorderRadius.circular(AppRadius.radiusXL),
+              border: isAdultMode ? Border.all(color: const Color(0xFFE2E8F0)) : null,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.shadow,
+                  color: isAdultMode ? const Color(0x0D000000) : AppColors.shadow,
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
               ],
             ),
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isAdultMode ? const Color(0xFF4F46E5) : AppColors.primary,
+              ),
               strokeWidth: 3,
             ),
           ),
           const SizedBox(height: AppDimensions.marginL),
           Text(
             'Memuat pertanyaan...',
-            style: AppFonts.bodyLarge.copyWith(color: AppColors.textSecondary),
+            style: AppFonts.bodyLarge.copyWith(
+              color: isAdultMode ? const Color(0xFF475569) : AppColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -321,16 +464,17 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildAnimatedProgressBar(QuizProvider quizProvider) {
+  Widget _buildAnimatedProgressBar(QuizProvider quizProvider, bool isAdultMode) {
     return Container(
       margin: const EdgeInsets.all(AppDimensions.paddingM),
       padding: const EdgeInsets.all(AppDimensions.paddingL),
       decoration: BoxDecoration(
-        color: AppColors.backgroundSecondary,
+        color: isAdultMode ? Colors.white : AppColors.backgroundSecondary,
         borderRadius: BorderRadius.circular(AppRadius.radiusL),
+        border: isAdultMode ? Border.all(color: const Color(0xFFE2E8F0)) : null,
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow,
+            color: isAdultMode ? const Color(0x0A000000) : AppColors.shadow,
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -346,28 +490,11 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                 child: Text(
                   'Pertanyaan ${quizProvider.currentQuestion?.questionNumber ?? quizProvider.currentQuestionIndex + 1} dari ${quizProvider.totalQuestions}',
                   style: AppFonts.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
+                    color: isAdultMode ? const Color(0xFF475569) : AppColors.textSecondary,
                     fontWeight: AppFonts.medium,
                   ),
                 ),
               ),
-              // Container(
-              //   padding: const EdgeInsets.symmetric(
-              //     horizontal: AppDimensions.paddingM,
-              //     vertical: AppDimensions.paddingS,
-              //   ),
-              //   decoration: BoxDecoration(
-              //     gradient: LinearGradient(colors: AppColors.gradientPrimary),
-              //     borderRadius: BorderRadius.circular(AppRadius.radiusM),
-              //   ),
-              //   child: Text(
-              //     'Skor: ${quizProvider.score}',
-              //     style: AppFonts.labelMedium.copyWith(
-              //       color: Colors.white,
-              //       fontWeight: AppFonts.semiBold,
-              //     ),
-              //   ),
-              // ),
             ],
           ),
           const SizedBox(height: AppDimensions.marginM),
@@ -376,7 +503,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
               Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  color: AppColors.backgroundPrimary,
+                  color: isAdultMode ? const Color(0xFFE2E8F0) : AppColors.backgroundPrimary,
                   borderRadius: BorderRadius.circular(AppRadius.radiusS),
                 ),
               ),
@@ -389,17 +516,11 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                         MediaQuery.of(context).size.width *
                         (quizProvider.progress * _progressAnimation.value),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: AppColors.gradientPrimary,
-                      ),
+                      color: isAdultMode ? const Color(0xFF4F46E5) : null,
+                      gradient: isAdultMode
+                          ? null
+                          : LinearGradient(colors: AppColors.gradientPrimary),
                       borderRadius: BorderRadius.circular(AppRadius.radiusS),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.4),
-                          blurRadius: 4,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
                     ),
                   );
                 },

@@ -77,6 +77,11 @@ class _BiodataDialogState extends State<BiodataDialog>
 
   @override
   Widget build(BuildContext context) {
+    final isAdultMode = context.watch<UserProvider>().isAdultMode;
+    final dialogGradient = isAdultMode
+        ? const [Color(0xFF1E1B4B), Color(0xFF311B92)]
+        : const [Color(0xFF6B73FF), Color(0xFF9BA3FF)];
+
     return Dialog(
       backgroundColor: Colors.transparent,
       child: SlideTransition(
@@ -84,7 +89,7 @@ class _BiodataDialogState extends State<BiodataDialog>
         child: ScaleTransition(
           scale: _bounceAnimation,
           child: ColorfulCard(
-            gradient: const [Color(0xFF6B73FF), Color(0xFF9BA3FF)],
+            gradient: dialogGradient,
             child: Container(
               width: MediaQuery.of(context).size.width * 0.9,
               constraints: BoxConstraints(
@@ -99,7 +104,7 @@ class _BiodataDialogState extends State<BiodataDialog>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Header
-                      _buildHeader(),
+                      _buildHeader(isAdultMode),
 
                       const SizedBox(height: AppDimensions.marginL),
 
@@ -132,7 +137,7 @@ class _BiodataDialogState extends State<BiodataDialog>
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isAdultMode) {
     return Column(
       children: [
         // Icon dengan animasi pulse
@@ -148,8 +153,8 @@ class _BiodataDialogState extends State<BiodataDialog>
                   color: Colors.white.withOpacity(0.2),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.person_add,
+                child: Icon(
+                  isAdultMode ? Icons.badge_outlined : Icons.person_add,
                   size: 48,
                   color: Colors.white,
                 ),
@@ -167,7 +172,7 @@ class _BiodataDialogState extends State<BiodataDialog>
                 colors: [Colors.white, Colors.white70],
               ).createShader(bounds),
           child: Text(
-            'Halo, Kenalan Dulu Yuk!',
+            isAdultMode ? 'Formulir Data Diri Assesmen' : 'Halo, Kenalan Dulu Yuk!',
             style: AppFonts.headlineMedium.copyWith(
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -179,7 +184,9 @@ class _BiodataDialogState extends State<BiodataDialog>
         const SizedBox(height: AppDimensions.marginS),
 
         Text(
-          'Ceritakan tentang dirimu agar kita bisa bermain bersama',
+          isAdultMode
+              ? 'Lengkapi data diri untuk melanjutkan ke instrumen 13+ Tahun'
+              : 'Ceritakan tentang dirimu agar kita bisa bermain bersama',
           style: AppFonts.bodySmall.copyWith(
             color: Colors.white.withOpacity(0.9),
           ),
@@ -361,8 +368,14 @@ class _BiodataDialogState extends State<BiodataDialog>
         if (age == null) {
           return 'Umur harus berupa angka';
         }
-        if (age < 3 || age > 18) {
-          return 'Umur harus antara 3-18 tahun';
+        final selectedCat = context.read<UserProvider>().selectedAgeCategory;
+        if (selectedCat == '<13' && age >= 13) {
+          return 'Untuk kategori ini, umur harus di bawah 13 tahun';
+        } else if (selectedCat == '>=13' && age < 13) {
+          return 'Untuk kategori ini, umur harus 13 tahun ke atas';
+        }
+        if (age < 3 || age > 99) {
+          return 'Umur tidak valid';
         }
         return null;
       },

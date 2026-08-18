@@ -1,0 +1,317 @@
+[
+  {
+    "no": 1,
+    "variable": "Respect",
+    "indicator": "Developing Self-Respect",
+    "question_text": "Saya tetap menghargai kemampuan diri saya meskipun kemampuan olahraga saya berbeda dengan teman-teman.",
+    "point_type": "+"
+  },
+  {
+    "no": 2,
+    "variable": "Respect",
+    "indicator": "Developing Self-Respect",
+    "question_text": "Ketika teman bermain lebih baik dari saya, saya  merasa kemampuan saya tidak cukup baik.",
+    "point_type": "-"
+  },
+  {
+    "no": 3,
+    "variable": "Respect",
+    "indicator": "Developing Self-Respect",
+    "question_text": "Ketika kemampuan saya tidak seperti yang saya harapkan, saya merasa kecewa pada diri sendiri.",
+    "point_type": "-"
+  },
+  {
+    "no": 4,
+    "variable": "Respect",
+    "indicator": "Concept of Respect",
+    "question_text": "Jika saya tidak setuju dengan pendapat teman saya, saya biasanya tetap tertarik untuk mendengarkannya.",
+    "point_type": "+"
+  },
+  {
+    "no": 5,
+    "variable": "Respect",
+    "indicator": "Concept of Respect",
+    "question_text": "Saya bisa menyampaikan pendapat yang berbeda tanpa membuat teman saya merasa tidak nyaman.",
+    "point_type": "+"
+  },
+  {
+    "no": 6,
+    "variable": "Respect",
+    "indicator": "Concept of Respect",
+    "question_text": "Saya lebih mudah menghargai teman yang cara bermain atau cara berpikirnya sama dengan saya.",
+    "point_type": "-"
+  },
+  {
+    "no": 7,
+    "variable": "Respect",
+    "indicator": "Rules & Authorities",
+    "question_text": "Saya tidak pernah melanggar aturan permainan",
+    "point_type": "+"
+  },
+  {
+    "no": 8,
+    "variable": "Respect",
+    "indicator": "Rules & Authorities",
+    "question_text": "Saya tetap menerima keputusan wasit meskipun keputusan itu tidak sesuai dengan yang saya harapkan.",
+    "point_type": "+"
+  },
+  {
+    "no": 9,
+    "variable": "Respect",
+    "indicator": "Rules & Authorities",
+    "question_text": "Jika menurut saya suatu aturan tidak masuk akal, saya merasa tidak perlu terlalu mengikutinya.",
+    "point_type": "-"
+  },
+  {
+    "no": 10,
+    "variable": "Respect",
+    "indicator": "Conflict Resolution",
+    "question_text": "Saat berselisih dengan teman dalam permainan, saya biasanya memilih diam dan membiarkannya begitu saja.",
+    "point_type": "-"
+  },
+  {
+    "no": 11,
+    "variable": "Respect",
+    "indicator": "Conflict Resolution",
+    "question_text": "Saya mendengarkan alasan teman sebelum menentukan siapa yang salah dalam suatu masalah.",
+    "point_type": "+"
+  },
+  {
+    "no": 12,
+    "variable": "Respect",
+    "indicator": "Conflict Resolution",
+    "question_text": "Setelah terjadi perselisihan, saya masih berusaha mencari cara agar kami bisa bermain bersama dengan baik.",
+    "point_type": "+"
+  },
+  {
+    "no": 13,
+    "variable": "Respect",
+    "indicator": "Empathy",
+    "question_text": "Saya sering menganggap teman hanya kurang berusaha ketika permainannya tidak berjalan dengan baik.",
+    "point_type": "-"
+  },
+  {
+    "no": 14,
+    "variable": "Respect",
+    "indicator": "Empathy",
+    "question_text": "Ketika teman terlihat kesal setelah melakukan kesalahan, saya biasanya membiarkannya sendiri.",
+    "point_type": "-"
+  },
+  {
+    "no": 15,
+    "variable": "Respect",
+    "indicator": "Empathy",
+    "question_text": "Saya memperhatikan perubahan sikap teman ketika sesuatu terjadi dalam permainan.",
+    "point_type": "+"
+  },
+  {
+    "no": 16,
+    "variable": "Equity",
+    "indicator": "Advantage & Disadvantage",
+    "question_text": "Saya menyadari bahwa kesempatan seseorang untuk berkembang dalam olahraga bisa berbeda karena pengalaman atau dukungan yang mereka dapatkan.",
+    "point_type": "+"
+  },
+  {
+    "no": 17,
+    "variable": "Equity",
+    "indicator": "Advantage & Disadvantage",
+    "question_text": "Menurut saya, teman yang memiliki perlengkapan lebih lengkap lebih pantas mendapat kesempatan bermain lebih banyak.",
+    "point_type": "-"
+  },
+  {
+    "no": 18,
+    "variable": "Equity",
+    "indicator": "Advantage & Disadvantage",
+    "question_text": "Saya menganggap semua orang memiliki kesempatan yang sama untuk berkembang dalam olahraga.",
+    "point_type": "-"
+  },
+  {
+    "no": 19,
+    "variable": "Equity",
+    "indicator": "Equity vs Equality",
+    "question_text": "Saya merasa semua pemain harus mendapat bantuan yang sama agar pembagiannya adil.",
+    "point_type": "-"
+  },
+  {
+    "no": 20,
+    "variable": "Equity",
+    "indicator": "Equity vs Equality",
+    "question_text": "Saya tidak keberatan jika seorang teman mendapat dukungan khusus agar dapat mengikuti permainan bersama yang lain.",
+    "point_type": "+"
+  },
+  {
+    "no": 21,
+    "variable": "Equity",
+    "indicator": "Equity vs Equality",
+    "question_text": "Saya merasa pembagian yang adil tidak selalu berarti semua orang mendapat hal yang sama.",
+    "point_type": "+"
+  },
+  {
+    "no": 22,
+    "variable": "Equity",
+    "indicator": "Fairness in Sport",
+    "question_text": "Saya lebih memilih teman yang mahir banyak bermain agar tim memiliki peluang lebih besar untuk menang.",
+    "point_type": "-"
+  },
+  {
+    "no": 23,
+    "variable": "Equity",
+    "indicator": "Fairness in Sport",
+    "question_text": "Saya memikirkan siapa yang belum mendapat kesempatan bermain ketika memilih pemain untuk permainan berikutnya.",
+    "point_type": "+"
+  },
+  {
+    "no": 24,
+    "variable": "Equity",
+    "indicator": "Fairness in Sport",
+    "question_text": "Saya tidak keberatan jika teman yang belum banyak bermain mendapat giliran lebih dulu.",
+    "point_type": "+"
+  },
+  {
+    "no": 25,
+    "variable": "Equity",
+    "indicator": "Gender Equality",
+    "question_text": "Saat bermain, saya lebih nyaman satu tim dengan teman yang berjenis kelamin sama dengan saya.",
+    "point_type": "-"
+  },
+  {
+    "no": 26,
+    "variable": "Equity",
+    "indicator": "Gender Equality",
+    "question_text": "Saya tetap mau bermain satu tim dengan teman laki-laki maupun perempuan.",
+    "point_type": "+"
+  },
+  {
+    "no": 27,
+    "variable": "Equity",
+    "indicator": "Gender Equality",
+    "question_text": "Dalam memilih pemain, jenis kelamin bukan pertimbangan utama bagi saya.",
+    "point_type": "+"
+  },
+  {
+    "no": 28,
+    "variable": "Equity",
+    "indicator": "Sharing Responsibility",
+    "question_text": "Selama tugas saya sendiri sudah selesai, saya merasa tidak perlu ikut mengerjakan bagian teman.",
+    "point_type": "-"
+  },
+  {
+    "no": 29,
+    "variable": "Equity",
+    "indicator": "Sharing Responsibility",
+    "question_text": "Jika ada bagian yang belum dikerjakan dalam tim, saya bersedia membantu meskipun bukan saya yang ditugaskan.",
+    "point_type": "+"
+  },
+  {
+    "no": 30,
+    "variable": "Equity",
+    "indicator": "Sharing Responsibility",
+    "question_text": "Saya lebih suka mengambil tugas yang paling mudah bagi saya",
+    "point_type": "-"
+  },
+  {
+    "no": 31,
+    "variable": "Inclusion",
+    "indicator": "Removing Barriers",
+    "question_text": "Ketika seorang teman kesulitan mengikuti permainan, saya mencari cara agar ia tetap dapat ikut.",
+    "point_type": "+"
+  },
+  {
+    "no": 32,
+    "variable": "Inclusion",
+    "indicator": "Removing Barriers",
+    "question_text": "Saya merasa permainan tidak perlu diubah hanya karena ada satu orang yang kesulitan mengikutinya.",
+    "point_type": "-"
+  },
+  {
+    "no": 33,
+    "variable": "Inclusion",
+    "indicator": "Removing Barriers",
+    "question_text": "Tidak masalah jika hanya 1 orang yang tidak bisa mengikuti permainan",
+    "point_type": "-"
+  },
+  {
+    "no": 34,
+    "variable": "Inclusion",
+    "indicator": "Challenging Stereotypes",
+    "question_text": "Saya tidak langsung menilai kemampuan seseorang dari penampilannya.",
+    "point_type": "+"
+  },
+  {
+    "no": 35,
+    "variable": "Inclusion",
+    "indicator": "Challenging Stereotypes",
+    "question_text": "Saya tetap mau bermain dengan teman yang dianggap tidak mahir oleh teman-teman lain.",
+    "point_type": "+"
+  },
+  {
+    "no": 36,
+    "variable": "Inclusion",
+    "indicator": "Challenging Stereotypes",
+    "question_text": "Saya merasa teman yang terlihat kurang mampu memang biasanya tidak akan bisa bermain dengan baik.",
+    "point_type": "-"
+  },
+  {
+    "no": 37,
+    "variable": "Inclusion",
+    "indicator": "Accessibility",
+    "question_text": "Saya merasa semua teman seharusnya punya kesempatan untuk menggunakan fasilitas olahraga yang tersedia.",
+    "point_type": "+"
+  },
+  {
+    "no": 38,
+    "variable": "Inclusion",
+    "indicator": "Accessibility",
+    "question_text": "Menurut saya, tidak perlu memikirkan apakah semua pemain bisa menggunakan alat olahraga yang tersedia.",
+    "point_type": "-"
+  },
+  {
+    "no": 39,
+    "variable": "Inclusion",
+    "indicator": "Accessibility",
+    "question_text": "Saya merasa tempat bermain sebaiknya dapat digunakan oleh teman dengan kondisi yang berbeda-beda.",
+    "point_type": "+"
+  },
+  {
+    "no": 40,
+    "variable": "Inclusion",
+    "indicator": "Inclusive Communication",
+    "question_text": "Saya menggunakan cara lain untuk menjelaskan sesuatu ketika teman sulit memahami penjelasan saya.",
+    "point_type": "+"
+  },
+  {
+    "no": 41,
+    "variable": "Inclusion",
+    "indicator": "Inclusive Communication",
+    "question_text": "Saya biasanya langsung melanjutkan permainan meskipun teman belum memahami apa yang saya maksud.",
+    "point_type": "-"
+  },
+  {
+    "no": 42,
+    "variable": "Inclusion",
+    "indicator": "Inclusive Communication",
+    "question_text": "Saya memastikan teman memahami apa yang saya maksud sebelum kami melanjutkan permainan.",
+    "point_type": "+"
+  },
+  {
+    "no": 43,
+    "variable": "Inclusion",
+    "indicator": "Appreciation of Diversity",
+    "question_text": "Saya tetap nyaman bermain dengan teman yang memiliki kebiasaan atau latar belakang berbeda dengan saya.",
+    "point_type": "+"
+  },
+  {
+    "no": 44,
+    "variable": "Inclusion",
+    "indicator": "Appreciation of Diversity",
+    "question_text": "Saya lebih nyaman berada dalam kelompok yang memiliki kebiasaan yang sama dengan saya.",
+    "point_type": "-"
+  },
+  {
+    "no": 45,
+    "variable": "Inclusion",
+    "indicator": "Appreciation of Diversity",
+    "question_text": "Saya tertarik mengetahui cara bermain atau pengalaman olahraga yang berbeda dari yang biasa saya lakukan.",
+    "point_type": "+"
+  }
+]
