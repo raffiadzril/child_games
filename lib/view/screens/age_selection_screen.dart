@@ -7,11 +7,11 @@ import '../../core/constants/fonts.dart';
 import '../../core/constants/radius.dart';
 import '../../core/services/sound_service.dart';
 import '../../providers/user_provider.dart';
-import '../widgets/animated_gradient_background.dart';
 import 'home_screen.dart';
 import 'adult_home_screen.dart';
 
 /// Screen utama untuk memilih kelompok usia (Anak <13 vs Remaja & Dewasa 13+)
+/// Tema Terang Bersih (Clean Light Mode) Background Putih
 class AgeSelectionScreen extends StatefulWidget {
   const AgeSelectionScreen({super.key});
 
@@ -83,235 +83,99 @@ class _AgeSelectionScreenState extends State<AgeSelectionScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedGradientBackground(
-        child: SafeArea(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppDimensions.paddingL),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Header Logo
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withOpacity(0.3),
-                            blurRadius: 15,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+      backgroundColor: const Color(0xFFF8FAFC), // Clean white/slate background
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppDimensions.paddingL),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // App Icon Header
+                  Container(
+                    width: 76,
+                    height: 76,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEEF2FF),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFFC7D2FE),
+                        width: 1.5,
                       ),
-                      child: Center(
-                        child: Image.network(
-                          'https://jokvxdrxswytjjhxuhvk.supabase.co/storage/v1/object/public/challenges/logo.png',
-                          width: 54,
-                          height: 54,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Icon(
-                              Icons.psychology_rounded,
-                              size: 40,
-                              color: Colors.white,
-                            );
-                          },
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x1F4F46E5),
+                          blurRadius: 12,
+                          offset: Offset(0, 4),
                         ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.psychology_rounded,
+                        size: 40,
+                        color: Color(0xFF4F46E5),
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: AppDimensions.marginL),
+                  const SizedBox(height: AppDimensions.marginM),
 
-                    // App Title
-                    ShaderMask(
-                      shaderCallback: (bounds) => const LinearGradient(
-                        colors: [Colors.white, Color(0xFFE0E7FF)],
-                      ).createShader(bounds),
-                      child: Text(
-                        'Respect, Equity, & Inclusion',
-                        style: AppFonts.headlineLarge.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
+                  // App Title
+                  Text(
+                    'Instrumen Evaluasi REI',
+                    style: AppFonts.headlineLarge.copyWith(
+                      color: const Color(0xFF0F172A),
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
                     ),
+                    textAlign: TextAlign.center,
+                  ),
 
-                    const SizedBox(height: AppDimensions.marginS),
+                  const SizedBox(height: 6),
 
-                    Text(
-                      'Selamat datang! Silakan pilih kategori usia untuk memulai:',
-                      style: AppFonts.bodyMedium.copyWith(
-                        color: Colors.white.withOpacity(0.9),
-                      ),
-                      textAlign: TextAlign.center,
+                  Text(
+                    'Respect • Equity • Inclusion\nSilakan pilih kelompok usia Anda untuk memulai:',
+                    style: AppFonts.bodyMedium.copyWith(
+                      color: const Color(0xFF475569),
+                      height: 1.4,
                     ),
+                    textAlign: TextAlign.center,
+                  ),
 
-                    const SizedBox(height: AppDimensions.marginXL),
+                  const SizedBox(height: AppDimensions.marginXL),
 
-                    // Cards Container
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 480),
-                      child: Column(
-                        children: [
-                          // Child Option Card (< 13 Years)
-                          _buildChildCard(),
+                  // Cards Container
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    child: Column(
+                      children: [
+                        // Adult Option Card (13+ Years) - Recommended First
+                        _buildAdultCard(),
 
-                          const SizedBox(height: AppDimensions.marginL),
+                        const SizedBox(height: AppDimensions.marginL),
 
-                          // Adult Option Card (13+ Years)
-                          _buildAdultCard(),
-                        ],
-                      ),
+                        // Child Option Card (< 13 Years)
+                        _buildChildCard(),
+                      ],
                     ),
+                  ),
 
-                    const SizedBox(height: AppDimensions.marginXL),
+                  const SizedBox(height: AppDimensions.marginXL),
 
-                    Text(
-                      'Aplikasi Edukasi & Assesmen REI © 2026',
-                      style: AppFonts.bodySmall.copyWith(
-                        color: Colors.white54,
-                        fontSize: 11,
-                      ),
+                  Text(
+                    'Aplikasi Edukasi & Assesmen REI © 2026',
+                    style: AppFonts.bodySmall.copyWith(
+                      color: const Color(0xFF94A3B8),
+                      fontSize: 11,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildChildCard() {
-    return GestureDetector(
-      onTap: () => _selectCategory('<13'),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF6B73FF), Color(0xFF000DFF)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(AppRadius.radiusXL),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF6B73FF).withOpacity(0.4),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-          border: Border.all(
-            color: Colors.white.withOpacity(0.4),
-            width: 1.5,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.child_care_rounded,
-                    size: 36,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.amberAccent,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          'ANAK-ANAK',
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Di Bawah 13 Tahun',
-                        style: AppFonts.headlineSmall.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Text(
-              'Permainan kuesioner interaktif dengan gambar, ilustrasi ceria, dan feedback seru untuk anak-anak sekolah dasar.',
-              style: AppFonts.bodySmall.copyWith(
-                color: Colors.white.withOpacity(0.92),
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppRadius.radiusM),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Mulai Main',
-                        style: AppFonts.labelMedium.copyWith(
-                          color: const Color(0xFF000DFF),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      const Icon(
-                        Icons.arrow_forward_rounded,
-                        size: 16,
-                        color: Color(0xFF000DFF),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
         ),
       ),
     );
@@ -324,23 +188,19 @@ class _AgeSelectionScreenState extends State<AgeSelectionScreen>
         duration: const Duration(milliseconds: 250),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF1E1B4B), Color(0xFF311B92)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(AppRadius.radiusXL),
-          boxShadow: [
+          border: Border.all(
+            color: const Color(0xFF4F46E5),
+            width: 2,
+          ),
+          boxShadow: const [
             BoxShadow(
-              color: const Color(0xFF311B92).withOpacity(0.5),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
+              color: Color(0x1A4F46E5),
+              blurRadius: 16,
+              offset: Offset(0, 6),
             ),
           ],
-          border: Border.all(
-            color: const Color(0xFF818CF8).withOpacity(0.6),
-            width: 1.5,
-          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -350,16 +210,16 @@ class _AgeSelectionScreenState extends State<AgeSelectionScreen>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF6366F1).withOpacity(0.3),
+                    color: const Color(0xFFEEF2FF),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: const Color(0xFF818CF8).withOpacity(0.4),
+                      color: const Color(0xFFC7D2FE),
                     ),
                   ),
                   child: const Icon(
                     Icons.workspace_premium_rounded,
-                    size: 36,
-                    color: Color(0xFFA5B4FC),
+                    size: 32,
+                    color: Color(0xFF4F46E5),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -373,15 +233,16 @@ class _AgeSelectionScreenState extends State<AgeSelectionScreen>
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-                          ),
+                          color: const Color(0xFFEEF2FF),
                           borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: const Color(0xFFC7D2FE),
+                          ),
                         ),
                         child: const Text(
                           'REMAJA & DEWASA',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF4F46E5),
                             fontWeight: FontWeight.bold,
                             fontSize: 10,
                             letterSpacing: 0.8,
@@ -390,9 +251,9 @@ class _AgeSelectionScreenState extends State<AgeSelectionScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '13 Tahun Ke Atas',
+                        '13+ Tahun Ke Atas',
                         style: AppFonts.headlineSmall.copyWith(
-                          color: Colors.white,
+                          color: const Color(0xFF0F172A),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -403,9 +264,145 @@ class _AgeSelectionScreenState extends State<AgeSelectionScreen>
             ),
             const SizedBox(height: 14),
             Text(
-              'Modul Assesmen REI profesional untuk usia 13+ tahun. Evaluasi mendalam indikator Respect, Equity, & Inclusion dengan skala respon 5 tingkat.',
+              'Modul kuesioner mandiri 45 indikator evaluasi sikap saling menghargai (Respect), kesetaraan (Equity), dan inklusivitas (Inclusion).',
               style: AppFonts.bodySmall.copyWith(
-                color: const Color(0xFFC7D2FE),
+                color: const Color(0xFF475569),
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4F46E5),
+                    borderRadius: BorderRadius.circular(AppRadius.radiusM),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x294F46E5),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Mulai Assesmen 13+',
+                        style: AppFonts.labelMedium.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChildCard() {
+    return GestureDetector(
+      onTap: () => _selectCategory('<13'),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppRadius.radiusXL),
+          border: Border.all(
+            color: const Color(0xFFCBD5E1),
+            width: 1.5,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0A000000),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFF6FF),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFFBFDBFE),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.child_care_rounded,
+                    size: 32,
+                    color: Color(0xFF2563EB),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: const Color(0xFFBFDBFE),
+                          ),
+                        ),
+                        child: const Text(
+                          'ANAK-ANAK',
+                          style: TextStyle(
+                            color: Color(0xFF1D4ED8),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Di Bawah 13 Tahun',
+                        style: AppFonts.headlineSmall.copyWith(
+                          color: const Color(0xFF0F172A),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'Permainan kuesioner interaktif dengan gambar, ilustrasi ceria, dan umpan balik edukatif untuk siswa sekolah dasar.',
+              style: AppFonts.bodySmall.copyWith(
+                color: const Color(0xFF475569),
                 height: 1.4,
               ),
             ),
@@ -419,25 +416,19 @@ class _AgeSelectionScreenState extends State<AgeSelectionScreen>
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
-                    ),
+                    color: const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(AppRadius.radiusM),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF4F46E5).withOpacity(0.4),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
+                    border: Border.all(
+                      color: const Color(0xFFCBD5E1),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Masuk Assesmen 13+',
+                        'Mode Anak',
                         style: AppFonts.labelMedium.copyWith(
-                          color: Colors.white,
+                          color: const Color(0xFF334155),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -445,7 +436,7 @@ class _AgeSelectionScreenState extends State<AgeSelectionScreen>
                       const Icon(
                         Icons.arrow_forward_rounded,
                         size: 16,
-                        color: Colors.white,
+                        color: const Color(0xFF334155),
                       ),
                     ],
                   ),

@@ -106,7 +106,7 @@ class _AdultHomeScreenState extends State<AdultHomeScreen> {
                   }
 
                   // Find adult challenge (Assesmen REI 13+)
-                  ChallengeModel? adultChallenge;
+                  late ChallengeModel adultChallenge;
                   try {
                     adultChallenge = challengeProvider.challenges.firstWhere(
                       (c) =>
@@ -114,9 +114,14 @@ class _AdultHomeScreenState extends State<AdultHomeScreen> {
                           c.title.contains('13+'),
                     );
                   } catch (_) {
-                    if (challengeProvider.challenges.isNotEmpty) {
-                      adultChallenge = challengeProvider.challenges.first;
-                    }
+                    adultChallenge = ChallengeModel(
+                      id: 'a1b2c3d4-e5f6-7890-abcd-131313131313',
+                      title: 'Assesmen REI (13+ Tahun)',
+                      description: 'Kuesioner Respect, Equity, & Inclusion untuk usia 13 tahun ke atas',
+                      category: 'REI 13+',
+                      createdAt: DateTime.now(),
+                      updatedAt: DateTime.now(),
+                    );
                   }
 
                   return SingleChildScrollView(
@@ -130,10 +135,7 @@ class _AdultHomeScreenState extends State<AdultHomeScreen> {
                         const SizedBox(height: AppDimensions.marginXL),
 
                         // Adult Challenge Hero Card
-                        if (adultChallenge != null)
-                          _buildAdultAssessmentCard(adultChallenge)
-                        else
-                          _buildEmptyState(challengeProvider),
+                        _buildAdultAssessmentCard(adultChallenge),
 
                         const SizedBox(height: AppDimensions.marginXL),
 

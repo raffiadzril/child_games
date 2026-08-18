@@ -29,7 +29,7 @@
   <artifact
       classOutputs="build\intermediates\javac\release\compileReleaseJavaWithJavac\classes;build\tmp\kotlin-classes\release;build\kotlinToolingMetadata;build\intermediates\compile_and_runtime_not_namespaced_r_class_jar\release\processReleaseResources\R.jar"
       type="MAIN"
-      applicationId="com.example.child_games"
+      applicationId="com.rei2026.app"
       generatedSourceFolders="build\generated\ap_generated_sources\release\out"
       generatedResourceFolders="build\generated\res\resValues\release"
       desugaredMethodsFiles="C:\Users\RAFFI\.gradle\caches\8.10.2\transforms\85524ab411da983d4954cbf23297e086\transformed\D8BackportedDesugaredMethods.txt">

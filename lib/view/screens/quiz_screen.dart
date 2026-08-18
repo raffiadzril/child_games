@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/config/app_config.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/constants/fonts.dart';
@@ -176,23 +177,25 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: _buildAnimatedAppBar(isAdultMode),
-      floatingActionButton: Consumer<QuizProvider>(
-        builder: (context, quizProvider, child) {
-          if (quizProvider.isQuizCompleted || quizProvider.isLoading) {
-            return const SizedBox.shrink();
-          }
-          return FloatingActionButton.extended(
-            onPressed: () => _showDeveloperAutoFillDialog(quizProvider),
-            backgroundColor: const Color(0xFF4F46E5),
-            foregroundColor: Colors.white,
-            icon: const Icon(Icons.bug_report_rounded, size: 20),
-            label: const Text(
-              'DEV: Auto-Fill',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-            ),
-          );
-        },
-      ),
+      floatingActionButton: AppConfig.isDeveloperMode
+          ? Consumer<QuizProvider>(
+              builder: (context, quizProvider, child) {
+                if (quizProvider.isQuizCompleted || quizProvider.isLoading) {
+                  return const SizedBox.shrink();
+                }
+                return FloatingActionButton.extended(
+                  onPressed: () => _showDeveloperAutoFillDialog(quizProvider),
+                  backgroundColor: const Color(0xFF4F46E5),
+                  foregroundColor: Colors.white,
+                  icon: const Icon(Icons.bug_report_rounded, size: 20),
+                  label: const Text(
+                    'DEV: Auto-Fill',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
+                );
+              },
+            )
+          : null,
       body: isAdultMode
           ? Container(color: bgColor, child: bodyWidget)
           : AnimatedGradientBackground(child: bodyWidget),

@@ -1,8 +1,8 @@
 1<?xml version="1.0" encoding="utf-8"?>
 2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-3    package="com.example.child_games"
-4    android:versionCode="1"
-5    android:versionName="1.0.0" >
+3    package="com.rei2026.app"
+4    android:versionCode="6"
+5    android:versionName="1.0.5" >
 6
 7    <uses-sdk
 8        android:minSdkVersion="23"
@@ -38,12 +38,12 @@
 28
 29    <permission
 29-->[androidx.core:core:1.13.1] C:\Users\RAFFI\.gradle\caches\8.10.2\transforms\dfc2fbca530748e569b0737b09fa016f\transformed\core-1.13.1\AndroidManifest.xml:22:5-24:47
-30        android:name="com.example.child_games.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+30        android:name="com.rei2026.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
 30-->[androidx.core:core:1.13.1] C:\Users\RAFFI\.gradle\caches\8.10.2\transforms\dfc2fbca530748e569b0737b09fa016f\transformed\core-1.13.1\AndroidManifest.xml:23:9-81
 31        android:protectionLevel="signature" />
 31-->[androidx.core:core:1.13.1] C:\Users\RAFFI\.gradle\caches\8.10.2\transforms\dfc2fbca530748e569b0737b09fa016f\transformed\core-1.13.1\AndroidManifest.xml:24:9-44
 32
-33    <uses-permission android:name="com.example.child_games.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+33    <uses-permission android:name="com.rei2026.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
 33-->[androidx.core:core:1.13.1] C:\Users\RAFFI\.gradle\caches\8.10.2\transforms\dfc2fbca530748e569b0737b09fa016f\transformed\core-1.13.1\AndroidManifest.xml:26:5-97
 33-->[androidx.core:core:1.13.1] C:\Users\RAFFI\.gradle\caches\8.10.2\transforms\dfc2fbca530748e569b0737b09fa016f\transformed\core-1.13.1\AndroidManifest.xml:26:22-94
 34
@@ -137,7 +137,7 @@
 87-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\RAFFI\.gradle\caches\8.10.2\transforms\bb10008c4b33ee9597583412a41828ed\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:24:9-32:20
 88            android:name="androidx.startup.InitializationProvider"
 88-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\RAFFI\.gradle\caches\8.10.2\transforms\bb10008c4b33ee9597583412a41828ed\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:25:13-67
-89            android:authorities="com.example.child_games.androidx-startup"
+89            android:authorities="com.rei2026.app.androidx-startup"
 89-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\RAFFI\.gradle\caches\8.10.2\transforms\bb10008c4b33ee9597583412a41828ed\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:26:13-68
 90            android:exported="false" >
 90-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\RAFFI\.gradle\caches\8.10.2\transforms\bb10008c4b33ee9597583412a41828ed\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:27:13-37

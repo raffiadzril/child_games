@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/theme/app_theme.dart';
 import 'core/services/sound_service.dart';
 import 'view/screens/splash_screen.dart';
+import 'view/screens/age_selection_screen.dart';
 import 'providers/challenge_provider.dart';
 import 'providers/quiz_provider.dart';
 import 'providers/user_provider.dart';
@@ -114,7 +115,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         title: 'REI',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
-        home: const SplashScreen(),
+        home: const AgeSelectionScreen(),
         // onGenerateRoute: AppRoutes.generateRoute,
         // initialRoute: AppRoutes.home,
       ),
