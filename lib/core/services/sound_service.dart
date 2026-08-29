@@ -1,4 +1,5 @@
 import 'package:just_audio/just_audio.dart';
+import '../config/app_config.dart';
 
 /// Service untuk mengelola sound effects dan background music
 class SoundService {
@@ -55,7 +56,7 @@ class SoundService {
       _sfxPlayer = AudioPlayer();
       _musicPlayer = AudioPlayer();
       _isInitialized = true;
-      print('SoundService initialized successfully');
+      print('SoundService initialized successfully (AppConfig music: ${AppConfig.isMusicEnabled}, sfx: ${AppConfig.isSoundEnabled})');
     } catch (e) {
       print('Failed to initialize SoundService: $e');
       _isInitialized = false;
@@ -65,26 +66,29 @@ class SoundService {
   /// Enable atau disable sound effects
   void setSoundEnabled(bool enabled) {
     _isSoundEnabled = enabled;
+    if (!isSoundEnabled) {
+      stopSound();
+    }
   }
 
   /// Enable atau disable background music
   void setMusicEnabled(bool enabled) {
     _isMusicEnabled = enabled;
-    if (!enabled) {
+    if (!isMusicEnabled) {
       stopBackgroundMusic();
     }
   }
 
-  /// Check apakah sound diaktifkan
-  bool get isSoundEnabled => _isSoundEnabled;
+  /// Check apakah sound diaktifkan (global AppConfig + runtime toggle)
+  bool get isSoundEnabled => AppConfig.isSoundEnabled && _isSoundEnabled;
 
-  /// Check apakah music diaktifkan
-  bool get isMusicEnabled => _isMusicEnabled;
+  /// Check apakah music diaktifkan (global AppConfig + runtime toggle)
+  bool get isMusicEnabled => AppConfig.isMusicEnabled && _isMusicEnabled;
 
   /// Check apakah musik sedang playing
   bool get isMusicPlaying {
     try {
-      if (!_isInitialized || _musicPlayer == null) return false;
+      if (!isMusicEnabled || !_isInitialized || _musicPlayer == null) return false;
       return _musicPlayer!.playing;
     } catch (e) {
       print('Error checking music playing state: $e');
@@ -94,10 +98,11 @@ class SoundService {
 
   /// Start background music with looping
   Future<void> startBackgroundMusic() async {
-    if (!_isMusicEnabled || !_isInitialized || _musicPlayer == null) {
+    if (!isMusicEnabled || !_isInitialized || _musicPlayer == null) {
       print(
-        'Music not enabled or not initialized. Enabled: $_isMusicEnabled, Initialized: $_isInitialized',
+        'Music disabled (AppConfig.isMusicEnabled: ${AppConfig.isMusicEnabled}, runtime: $_isMusicEnabled)',
       );
+      await stopBackgroundMusic();
       return;
     }
 
@@ -237,7 +242,7 @@ class SoundService {
 
   /// Resume background music
   Future<void> resumeBackgroundMusic() async {
-    if (!_isMusicEnabled || !_isInitialized || _musicPlayer == null) return;
+    if (!isMusicEnabled || !_isInitialized || _musicPlayer == null) return;
 
     try {
       // Check if music player has a source loaded
@@ -261,7 +266,7 @@ class SoundService {
 
   /// Play sound effect untuk click option
   Future<void> playClickSound() async {
-    if (!_isSoundEnabled || !_isInitialized || _sfxPlayer == null) return;
+    if (!isSoundEnabled || !_isInitialized || _sfxPlayer == null) return;
 
     try {
       // Stop any currently playing sound effect
@@ -278,7 +283,7 @@ class SoundService {
 
   /// Play sound dengan URL custom
   Future<void> playCustomSound(String url) async {
-    if (!_isSoundEnabled || !_isInitialized || _sfxPlayer == null) return;
+    if (!isSoundEnabled || !_isInitialized || _sfxPlayer == null) return;
 
     try {
       await _sfxPlayer!.stop();

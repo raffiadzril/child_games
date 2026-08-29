@@ -8,7 +8,7 @@ import '../../core/services/sound_service.dart';
 import '../../providers/user_provider.dart';
 import 'colorful_card.dart';
 
-/// Dialog popup untuk mengisi biodata user
+/// Dialog popup 2-halaman (Identitas & Tentang Anda) untuk mengisi biodata user
 class BiodataDialog extends StatefulWidget {
   final VoidCallback? onSuccess;
 
@@ -20,19 +20,63 @@ class BiodataDialog extends StatefulWidget {
 
 class _BiodataDialogState extends State<BiodataDialog>
     with TickerProviderStateMixin {
-  final _formKey = GlobalKey<FormState>();
+  final _formKeyStep1 = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
-  final _classController = TextEditingController();
-  final _schoolController = TextEditingController();
 
+  int _currentStep = 0; // 0: Identitas, 1: Tentang Anda
+
+  // Step 1: Identitas
   String _selectedGender = '';
+  String? _selectedEducationLevel;
+
+  // Step 2: Tentang Anda (Sports Profile Questions)
+  String? _isActiveSportsMember;
+  String? _sportsDuration;
+  String? _sportsFrequency;
+  String? _sportsLiking;
+  String? _hasSportsCompetition;
+  String? _likesSportsCompetition;
+
   bool _isSubmitting = false;
 
   late AnimationController _slideController;
   late AnimationController _bounceController;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _bounceAnimation;
+
+  final List<String> _educationOptions = [
+    'SMP',
+    'SMA',
+    'Perguruan Tinggi',
+    'Umum',
+  ];
+
+  final List<String> _yesNoOptions = ['Ya', 'Tidak'];
+
+  final List<String> _durationOptions = [
+    'Tidak pernah aktif',
+    'Kurang dari 1 tahun',
+    '1-2 tahun',
+    '3-4 tahun',
+    'Lebih dari 4 tahun',
+  ];
+
+  final List<String> _frequencyOptions = [
+    'Tidak pernah',
+    '1 kali',
+    '2 kali',
+    '3-4 kali',
+    '5 kali atau lebih',
+  ];
+
+  final List<String> _likingOptions = [
+    'Sangat tidak menyukai',
+    'Tidak menyukai',
+    'Biasa saja',
+    'Menyukai',
+    'Sangat menyukai',
+  ];
 
   @override
   void initState() {
@@ -59,7 +103,6 @@ class _BiodataDialogState extends State<BiodataDialog>
       CurvedAnimation(parent: _bounceController, curve: Curves.elasticOut),
     );
 
-    // Start animations
     _slideController.forward();
     _bounceController.forward();
   }
@@ -68,8 +111,6 @@ class _BiodataDialogState extends State<BiodataDialog>
   void dispose() {
     _nameController.dispose();
     _ageController.dispose();
-    _classController.dispose();
-    _schoolController.dispose();
     _slideController.dispose();
     _bounceController.dispose();
     super.dispose();
@@ -91,44 +132,32 @@ class _BiodataDialogState extends State<BiodataDialog>
           child: ColorfulCard(
             gradient: dialogGradient,
             child: Container(
-              width: MediaQuery.of(context).size.width * 0.9,
+              width: MediaQuery.of(context).size.width * 0.92,
               constraints: BoxConstraints(
-                maxWidth: 400,
-                maxHeight: MediaQuery.of(context).size.height * 0.8,
+                maxWidth: 440,
+                maxHeight: MediaQuery.of(context).size.height * 0.85,
               ),
               padding: const EdgeInsets.all(AppDimensions.paddingL),
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Header
-                      _buildHeader(isAdultMode),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Step Indicator Header
+                  _buildStepHeader(isAdultMode),
+                  const SizedBox(height: AppDimensions.marginM),
 
-                      const SizedBox(height: AppDimensions.marginL),
-
-                      // Form Fields
-                      _buildNameField(),
-                      const SizedBox(height: AppDimensions.marginM),
-
-                      _buildGenderSelection(),
-                      const SizedBox(height: AppDimensions.marginM),
-
-                      _buildAgeField(),
-                      const SizedBox(height: AppDimensions.marginM),
-
-                      _buildClassField(),
-                      const SizedBox(height: AppDimensions.marginM),
-
-                      _buildSchoolField(),
-                      const SizedBox(height: AppDimensions.marginL),
-
-                      // Buttons
-                      _buildButtons(),
-                    ],
+                  // Main Scrollable Content (Step 1 vs Step 2)
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: _currentStep == 0
+                          ? _buildStep1Identitas()
+                          : _buildStep2TentangAnda(),
+                    ),
                   ),
-                ),
+
+                  const SizedBox(height: AppDimensions.marginL),
+                  // Buttons Footer
+                  _buildFooterButtons(),
+                ],
               ),
             ),
           ),
@@ -137,62 +166,114 @@ class _BiodataDialogState extends State<BiodataDialog>
     );
   }
 
-  Widget _buildHeader(bool isAdultMode) {
+  Widget _buildStepHeader(bool isAdultMode) {
     return Column(
       children: [
-        // Icon dengan animasi pulse
-        TweenAnimationBuilder<double>(
-          duration: const Duration(seconds: 2),
-          tween: Tween(begin: 1.0, end: 1.1),
-          builder: (context, value, child) {
-            return Transform.scale(
-              scale: value,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  isAdultMode ? Icons.badge_outlined : Icons.person_add,
-                  size: 48,
-                  color: Colors.white,
-                ),
-              ),
-            );
-          },
-        ),
-
-        const SizedBox(height: AppDimensions.marginM),
-
-        // Title
-        ShaderMask(
-          shaderCallback:
-              (bounds) => const LinearGradient(
-                colors: [Colors.white, Colors.white70],
-              ).createShader(bounds),
-          child: Text(
-            isAdultMode ? 'Formulir Data Diri Assesmen' : 'Halo, Kenalan Dulu Yuk!',
-            style: AppFonts.headlineMedium.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildStepBadge(step: 0, title: '1. Identitas'),
+            Container(
+              width: 30,
+              height: 2,
+              color: Colors.white.withOpacity(0.4),
+              margin: const EdgeInsets.symmetric(horizontal: 8),
             ),
-            textAlign: TextAlign.center,
-          ),
+            _buildStepBadge(step: 1, title: '2. Tentang Anda'),
+          ],
         ),
-
-        const SizedBox(height: AppDimensions.marginS),
-
+        const SizedBox(height: AppDimensions.marginM),
         Text(
-          isAdultMode
-              ? 'Lengkapi data diri untuk melanjutkan ke instrumen 13+ Tahun'
-              : 'Ceritakan tentang dirimu agar kita bisa bermain bersama',
+          _currentStep == 0
+              ? (isAdultMode ? 'Formulir Data Diri' : 'Halo, Kenalan Dulu Yuk!')
+              : 'Tentang Aktivitas Anda',
+          style: AppFonts.headlineMedium.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _currentStep == 0
+              ? 'Isi identitas diri untuk memulai assesmen'
+              : 'Jawab pertanyaan seputar kebiasaan & minat olahraga',
           style: AppFonts.bodySmall.copyWith(
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withOpacity(0.85),
           ),
           textAlign: TextAlign.center,
         ),
       ],
+    );
+  }
+
+  Widget _buildStepBadge({required int step, required String title}) {
+    final isActive = _currentStep == step;
+    final isDone = _currentStep > step;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: isActive
+            ? Colors.white
+            : (isDone ? Colors.green.withOpacity(0.3) : Colors.white.withOpacity(0.15)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isActive ? Colors.white : Colors.white.withOpacity(0.4),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isDone)
+            const Icon(Icons.check_circle, size: 14, color: Colors.white)
+          else
+            Text(
+              '${step + 1}',
+              style: TextStyle(
+                color: isActive ? const Color(0xFF311B92) : Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          const SizedBox(width: 6),
+          Text(
+            title,
+            style: TextStyle(
+              color: isActive ? const Color(0xFF311B92) : Colors.white,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================= STEP 1: IDENTITAS =================
+  Widget _buildStep1Identitas() {
+    return Form(
+      key: _formKeyStep1,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Nama Field
+          _buildNameField(),
+          const SizedBox(height: AppDimensions.marginM),
+
+          // Jenis Kelamin Selection
+          _buildGenderSelection(),
+          const SizedBox(height: AppDimensions.marginM),
+
+          // Umur Field
+          _buildAgeField(),
+          const SizedBox(height: AppDimensions.marginM),
+
+          // Jenjang Sekolah Dropdown
+          _buildEducationLevelDropdown(),
+        ],
+      ),
     );
   }
 
@@ -215,11 +296,11 @@ class _BiodataDialogState extends State<BiodataDialog>
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.radiusM),
-          borderSide: const BorderSide(color: Colors.red),
+          borderSide: const BorderSide(color: Colors.redAccent),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.radiusM),
-          borderSide: const BorderSide(color: Colors.red, width: 2),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 2),
         ),
         filled: true,
         fillColor: Colors.white.withOpacity(0.1),
@@ -249,7 +330,6 @@ class _BiodataDialogState extends State<BiodataDialog>
           ),
         ),
         const SizedBox(height: AppDimensions.marginS),
-
         Row(
           children: [
             Expanded(
@@ -261,15 +341,12 @@ class _BiodataDialogState extends State<BiodataDialog>
             ),
           ],
         ),
-
         if (_selectedGender.isEmpty)
           Padding(
-            padding: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.only(top: 6),
             child: Text(
               'Pilih jenis kelamin',
-              style: AppFonts.bodySmall.copyWith(
-                color: Colors.red.withOpacity(0.8),
-              ),
+              style: AppFonts.bodySmall.copyWith(color: Colors.redAccent),
             ),
           ),
       ],
@@ -291,10 +368,9 @@ class _BiodataDialogState extends State<BiodataDialog>
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color:
-              isSelected
-                  ? Colors.white.withOpacity(0.2)
-                  : Colors.white.withOpacity(0.05),
+          color: isSelected
+              ? Colors.white.withOpacity(0.25)
+              : Colors.white.withOpacity(0.08),
           borderRadius: BorderRadius.circular(AppRadius.radiusM),
           border: Border.all(
             color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
@@ -315,7 +391,6 @@ class _BiodataDialogState extends State<BiodataDialog>
                 ),
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
-                maxLines: 1,
               ),
             ),
           ],
@@ -350,11 +425,11 @@ class _BiodataDialogState extends State<BiodataDialog>
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.radiusM),
-          borderSide: const BorderSide(color: Colors.red),
+          borderSide: const BorderSide(color: Colors.redAccent),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.radiusM),
-          borderSide: const BorderSide(color: Colors.red, width: 2),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 2),
         ),
         filled: true,
         fillColor: Colors.white.withOpacity(0.1),
@@ -382,12 +457,15 @@ class _BiodataDialogState extends State<BiodataDialog>
     );
   }
 
-  Widget _buildClassField() {
-    return TextFormField(
-      controller: _classController,
+  Widget _buildEducationLevelDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _selectedEducationLevel,
+      dropdownColor: const Color(0xFF1E1B4B),
+      style: const TextStyle(color: Colors.white),
+      iconEnabledColor: Colors.white,
       decoration: InputDecoration(
-        labelText: 'Kelas',
-        hintText: 'Contoh: 1A, 2B, TK A',
+        labelText: 'Jenjang Sekolah',
+        hintText: 'Pilih Jenjang Sekolah',
         prefixIcon: const Icon(Icons.school, color: Colors.white70),
         labelStyle: TextStyle(color: Colors.white.withOpacity(0.9)),
         hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
@@ -401,79 +479,282 @@ class _BiodataDialogState extends State<BiodataDialog>
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.radiusM),
-          borderSide: const BorderSide(color: Colors.red),
+          borderSide: const BorderSide(color: Colors.redAccent),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.radiusM),
-          borderSide: const BorderSide(color: Colors.red, width: 2),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 2),
         ),
         filled: true,
         fillColor: Colors.white.withOpacity(0.1),
       ),
-      style: const TextStyle(color: Colors.white),
+      items: _educationOptions.map((String option) {
+        return DropdownMenuItem<String>(
+          value: option,
+          child: Text(option, style: const TextStyle(color: Colors.white)),
+        );
+      }).toList(),
+      onChanged: (String? newValue) {
+        setState(() {
+          _selectedEducationLevel = newValue;
+        });
+      },
       validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'Kelas tidak boleh kosong';
+        if (value == null || value.isEmpty) {
+          return 'Pilih jenjang sekolah Anda';
         }
         return null;
       },
     );
   }
 
-  Widget _buildSchoolField() {
-    return TextFormField(
-      controller: _schoolController,
+  // ================= STEP 2: TENTANG ANDA =================
+  Widget _buildStep2TentangAnda() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Question 1
+        _buildQuestionCard(
+          number: 1,
+          question:
+              'Apakah Anda saat ini aktif mengikuti latihan olahraga sebagai anggota tim sekolah atau klub olahraga?',
+          child: _buildChoiceChips(
+            options: _yesNoOptions,
+            selectedValue: _isActiveSportsMember,
+            onSelected: (val) => setState(() => _isActiveSportsMember = val),
+          ),
+        ),
+        const SizedBox(height: AppDimensions.marginM),
+
+        // Question 2
+        _buildQuestionCard(
+          number: 2,
+          question:
+              'Berapa lama Anda telah aktif mengikuti latihan olahraga di sekolah atau klub?',
+          child: _buildDropdownQuestion(
+            hint: 'Pilihan Lama Latihan',
+            options: _durationOptions,
+            selectedValue: _sportsDuration,
+            onChanged: (val) => setState(() => _sportsDuration = val),
+          ),
+        ),
+        const SizedBox(height: AppDimensions.marginM),
+
+        // Question 3
+        _buildQuestionCard(
+          number: 3,
+          question:
+              'Dalam satu minggu, seberapa sering Anda mengikuti latihan atau kegiatan olahraga di luar pelajaran PJOK?',
+          child: _buildDropdownQuestion(
+            hint: 'Pilihan Frekuensi Seminggu',
+            options: _frequencyOptions,
+            selectedValue: _sportsFrequency,
+            onChanged: (val) => setState(() => _sportsFrequency = val),
+          ),
+        ),
+        const SizedBox(height: AppDimensions.marginM),
+
+        // Question 4
+        _buildQuestionCard(
+          number: 4,
+          question:
+              'Seberapa besar Anda menyukai kegiatan olahraga atau aktivitas fisik?',
+          child: _buildDropdownQuestion(
+            hint: 'Pilihan Tingkat Menyukai',
+            options: _likingOptions,
+            selectedValue: _sportsLiking,
+            onChanged: (val) => setState(() => _sportsLiking = val),
+          ),
+        ),
+        const SizedBox(height: AppDimensions.marginM),
+
+        // Question 5
+        _buildQuestionCard(
+          number: 5,
+          question:
+              'Apakah Anda pernah mengikuti kompetisi/lomba olahraga sebelumnya?',
+          child: _buildChoiceChips(
+            options: _yesNoOptions,
+            selectedValue: _hasSportsCompetition,
+            onSelected: (val) => setState(() => _hasSportsCompetition = val),
+          ),
+        ),
+        const SizedBox(height: AppDimensions.marginM),
+
+        // Question 6
+        _buildQuestionCard(
+          number: 6,
+          question: 'Apakah Anda menyukai kompetisi/lomba olahraga?',
+          child: _buildChoiceChips(
+            options: _yesNoOptions,
+            selectedValue: _likesSportsCompetition,
+            onSelected: (val) => setState(() => _likesSportsCompetition = val),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuestionCard({
+    required int number,
+    required String question,
+    required Widget child,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(AppRadius.radiusM),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: Colors.white24,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  '$number',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  question,
+                  style: AppFonts.bodySmall.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChoiceChips({
+    required List<String> options,
+    required String? selectedValue,
+    required ValueChanged<String> onSelected,
+  }) {
+    return Row(
+      children: options.map((opt) {
+        final isSelected = selectedValue == opt;
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: GestureDetector(
+              onTap: () async {
+                await SoundService.instance.playClickSound();
+                HapticFeedback.lightImpact();
+                onSelected(opt);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Colors.white
+                      : Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppRadius.radiusS),
+                  border: Border.all(
+                    color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
+                  ),
+                ),
+                child: Text(
+                  opt,
+                  style: TextStyle(
+                    color: isSelected ? const Color(0xFF311B92) : Colors.white,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontSize: 13,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildDropdownQuestion({
+    required String hint,
+    required List<String> options,
+    required String? selectedValue,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: selectedValue,
+      dropdownColor: const Color(0xFF1E1B4B),
+      style: const TextStyle(color: Colors.white),
+      iconEnabledColor: Colors.white,
       decoration: InputDecoration(
-        labelText: 'Sekolah',
-        hintText: 'Contoh: SD Negeri 1, TK Harapan',
-        prefixIcon: const Icon(Icons.location_city, color: Colors.white70),
-        labelStyle: TextStyle(color: Colors.white.withOpacity(0.9)),
+        hintText: hint,
         hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.radiusM),
+          borderRadius: BorderRadius.circular(AppRadius.radiusS),
           borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.radiusM),
+          borderRadius: BorderRadius.circular(AppRadius.radiusS),
           borderSide: const BorderSide(color: Colors.white, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.radiusM),
-          borderSide: const BorderSide(color: Colors.red),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.radiusM),
-          borderSide: const BorderSide(color: Colors.red, width: 2),
         ),
         filled: true,
         fillColor: Colors.white.withOpacity(0.1),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
-      style: const TextStyle(color: Colors.white),
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'Nama sekolah tidak boleh kosong';
-        }
-        if (value.trim().length < 3) {
-          return 'Nama sekolah minimal 3 karakter';
-        }
-        return null;
+      items: options.map((String opt) {
+        return DropdownMenuItem<String>(
+          value: opt,
+          child: Text(
+            opt,
+            style: const TextStyle(color: Colors.white, fontSize: 13),
+          ),
+        );
+      }).toList(),
+      onChanged: (val) async {
+        await SoundService.instance.playClickSound();
+        onChanged(val);
       },
     );
   }
 
-  Widget _buildButtons() {
+  // ================= FOOTER BUTTONS =================
+  Widget _buildFooterButtons() {
     return Row(
       children: [
-        // Cancel Button
+        // Back / Cancel Button
         Expanded(
           child: TextButton(
-            onPressed:
-                _isSubmitting
-                    ? null
-                    : () async {
-                      await SoundService.instance.playClickSound();
+            onPressed: _isSubmitting
+                ? null
+                : () async {
+                    await SoundService.instance.playClickSound();
+                    if (_currentStep == 1) {
+                      setState(() => _currentStep = 0);
+                    } else {
                       Navigator.of(context).pop();
-                    },
+                    }
+                  },
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
@@ -482,9 +763,9 @@ class _BiodataDialogState extends State<BiodataDialog>
               ),
             ),
             child: Text(
-              'Batal',
+              _currentStep == 1 ? 'Kembali' : 'Batal',
               style: AppFonts.labelMedium.copyWith(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withOpacity(0.9),
               ),
             ),
           ),
@@ -492,43 +773,61 @@ class _BiodataDialogState extends State<BiodataDialog>
 
         const SizedBox(width: AppDimensions.marginM),
 
-        // Submit Button
+        // Next / Submit Button
         Expanded(
           flex: 2,
           child: Consumer<UserProvider>(
             builder: (context, userProvider, child) {
               return ElevatedButton(
-                onPressed:
-                    (_isSubmitting || userProvider.isLoading)
-                        ? null
-                        : _submitForm,
+                onPressed: (_isSubmitting || userProvider.isLoading)
+                    ? null
+                    : () {
+                        if (_currentStep == 0) {
+                          _goToStep2();
+                        } else {
+                          _submitForm();
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFF6B73FF),
+                  foregroundColor: const Color(0xFF311B92),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppRadius.radiusM),
                   ),
                   elevation: 2,
                 ),
-                child:
-                    _isSubmitting || userProvider.isLoading
-                        ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Color(0xFF6B73FF),
-                            ),
-                          ),
-                        )
-                        : Text(
-                          'Mulai!',
-                          style: AppFonts.labelMedium.copyWith(
-                            fontWeight: FontWeight.bold,
+                child: _isSubmitting || userProvider.isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFF311B92),
                           ),
                         ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _currentStep == 0 ? 'Lanjut' : 'Mulai!',
+                            style: AppFonts.labelMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF311B92),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            _currentStep == 0
+                                ? Icons.arrow_forward_rounded
+                                : Icons.check_circle_rounded,
+                            size: 18,
+                            color: const Color(0xFF311B92),
+                          ),
+                        ],
+                      ),
               );
             },
           ),
@@ -537,11 +836,43 @@ class _BiodataDialogState extends State<BiodataDialog>
     );
   }
 
-  Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate() || _selectedGender.isEmpty) {
+  void _goToStep2() async {
+    if (!_formKeyStep1.currentState!.validate() || _selectedGender.isEmpty) {
       if (_selectedGender.isEmpty) {
-        setState(() {}); // Refresh to show gender error
+        setState(() {}); // Show gender error
       }
+      return;
+    }
+
+    await SoundService.instance.playClickSound();
+    HapticFeedback.lightImpact();
+
+    setState(() {
+      _currentStep = 1;
+    });
+  }
+
+  Future<void> _submitForm() async {
+    // Validate Step 2 inputs
+    if (_isActiveSportsMember == null ||
+        _sportsDuration == null ||
+        _sportsFrequency == null ||
+        _sportsLiking == null ||
+        _hasSportsCompetition == null ||
+        _likesSportsCompetition == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Mohon jawab semua pertanyaan pada halaman Tentang Anda.',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.orange.shade800,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.radiusS),
+          ),
+        ),
+      );
       return;
     }
 
@@ -558,8 +889,13 @@ class _BiodataDialogState extends State<BiodataDialog>
       name: _nameController.text.trim(),
       gender: _selectedGender,
       age: int.parse(_ageController.text),
-      className: _classController.text.trim(),
-      school: _schoolController.text.trim(),
+      educationLevel: _selectedEducationLevel,
+      isActiveSportsMember: _isActiveSportsMember,
+      sportsDuration: _sportsDuration,
+      sportsFrequency: _sportsFrequency,
+      sportsLiking: _sportsLiking,
+      hasSportsCompetition: _hasSportsCompetition,
+      likesSportsCompetition: _likesSportsCompetition,
     );
 
     setState(() {
@@ -567,7 +903,6 @@ class _BiodataDialogState extends State<BiodataDialog>
     });
 
     if (success) {
-      // Success - close dialog and call callback
       if (mounted) {
         Navigator.of(context).pop();
         if (widget.onSuccess != null) {
@@ -575,12 +910,11 @@ class _BiodataDialogState extends State<BiodataDialog>
         }
       }
     } else {
-      // Show error
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              userProvider.errorMessage ?? 'Terjadi kesalahan',
+              userProvider.errorMessage ?? 'Terjadi kesalahan saat mendaftar',
               style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: Colors.red,

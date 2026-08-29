@@ -8,10 +8,19 @@ class UserModel extends BaseModel {
   final String name;
   final String gender; // 'laki-laki' atau 'perempuan'
   final int age;
-  final String
-  className; // Menggunakan className karena class adalah reserved word
-  final String school; // Nama sekolah
+  final String? educationLevel; // 'SMP', 'SMA', 'Perguruan Tinggi', 'Umum'
+  final String className; // Optional
+  final String school; // Optional
   final String role; // Auto set ke 'murid'
+  
+  // Halaman Baru: Tentang Anda (Sports & Physical Activity Profile)
+  final String? isActiveSportsMember; // 'Ya' / 'Tidak'
+  final String? sportsDuration; // 'Tidak pernah aktif', 'Kurang dari 1 tahun', '1-2 tahun', '3-4 tahun', 'Lebih dari 4 tahun'
+  final String? sportsFrequency; // 'Tidak pernah', '1 kali', '2 kali', '3-4 kali', '5 kali atau lebih'
+  final String? sportsLiking; // 'Sangat tidak menyukai', 'Tidak menyukai', 'Biasa saja', 'Menyukai', 'Sangat menyukai'
+  final String? hasSportsCompetition; // 'Ya' / 'Tidak'
+  final String? likesSportsCompetition; // 'Ya' / 'Tidak'
+
   @override
   final DateTime createdAt;
   @override
@@ -22,9 +31,16 @@ class UserModel extends BaseModel {
     required this.name,
     required this.gender,
     required this.age,
-    required this.className,
-    required this.school,
+    this.educationLevel,
+    this.className = '',
+    this.school = '',
     this.role = 'murid',
+    this.isActiveSportsMember,
+    this.sportsDuration,
+    this.sportsFrequency,
+    this.sportsLiking,
+    this.hasSportsCompetition,
+    this.likesSportsCompetition,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : id = id ?? const Uuid().v4(),
@@ -37,9 +53,16 @@ class UserModel extends BaseModel {
       name: json['name'] as String,
       gender: json['gender'] as String,
       age: json['age'] as int,
-      className: json['class'] as String,
+      educationLevel: json['education_level'] as String?,
+      className: json['class'] as String? ?? '',
       school: json['school'] as String? ?? '',
       role: json['role'] as String? ?? 'murid',
+      isActiveSportsMember: json['is_active_sports_member'] as String?,
+      sportsDuration: json['sports_duration'] as String?,
+      sportsFrequency: json['sports_frequency'] as String?,
+      sportsLiking: json['sports_liking'] as String?,
+      hasSportsCompetition: json['has_sports_competition'] as String?,
+      likesSportsCompetition: json['likes_sports_competition'] as String?,
       createdAt:
           json['created_at'] != null
               ? DateTime.parse(json['created_at'] as String)
@@ -58,9 +81,16 @@ class UserModel extends BaseModel {
       'name': name,
       'gender': gender,
       'age': age,
+      'education_level': educationLevel,
       'class': className,
       'school': school,
       'role': role,
+      'is_active_sports_member': isActiveSportsMember,
+      'sports_duration': sportsDuration,
+      'sports_frequency': sportsFrequency,
+      'sports_liking': sportsLiking,
+      'has_sports_competition': hasSportsCompetition,
+      'likes_sports_competition': likesSportsCompetition,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -72,9 +102,16 @@ class UserModel extends BaseModel {
     String? name,
     String? gender,
     int? age,
+    String? educationLevel,
     String? className,
     String? school,
     String? role,
+    String? isActiveSportsMember,
+    String? sportsDuration,
+    String? sportsFrequency,
+    String? sportsLiking,
+    String? hasSportsCompetition,
+    String? likesSportsCompetition,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -83,9 +120,16 @@ class UserModel extends BaseModel {
       name: name ?? this.name,
       gender: gender ?? this.gender,
       age: age ?? this.age,
+      educationLevel: educationLevel ?? this.educationLevel,
       className: className ?? this.className,
       school: school ?? this.school,
       role: role ?? this.role,
+      isActiveSportsMember: isActiveSportsMember ?? this.isActiveSportsMember,
+      sportsDuration: sportsDuration ?? this.sportsDuration,
+      sportsFrequency: sportsFrequency ?? this.sportsFrequency,
+      sportsLiking: sportsLiking ?? this.sportsLiking,
+      hasSportsCompetition: hasSportsCompetition ?? this.hasSportsCompetition,
+      likesSportsCompetition: likesSportsCompetition ?? this.likesSportsCompetition,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -93,7 +137,7 @@ class UserModel extends BaseModel {
 
   @override
   String toString() {
-    return 'UserModel(id: $id, name: $name, gender: $gender, age: $age, className: $className, school: $school, role: $role)';
+    return 'UserModel(id: $id, name: $name, gender: $gender, age: $age, educationLevel: $educationLevel, role: $role)';
   }
 
   @override
@@ -104,9 +148,16 @@ class UserModel extends BaseModel {
         other.name == name &&
         other.gender == gender &&
         other.age == age &&
+        other.educationLevel == educationLevel &&
         other.className == className &&
         other.school == school &&
-        other.role == role;
+        other.role == role &&
+        other.isActiveSportsMember == isActiveSportsMember &&
+        other.sportsDuration == sportsDuration &&
+        other.sportsFrequency == sportsFrequency &&
+        other.sportsLiking == sportsLiking &&
+        other.hasSportsCompetition == hasSportsCompetition &&
+        other.likesSportsCompetition == likesSportsCompetition;
   }
 
   @override
@@ -115,8 +166,16 @@ class UserModel extends BaseModel {
         name.hashCode ^
         gender.hashCode ^
         age.hashCode ^
+        educationLevel.hashCode ^
         className.hashCode ^
         school.hashCode ^
-        role.hashCode;
+        role.hashCode ^
+        isActiveSportsMember.hashCode ^
+        sportsDuration.hashCode ^
+        sportsFrequency.hashCode ^
+        sportsLiking.hashCode ^
+        hasSportsCompetition.hashCode ^
+        likesSportsCompetition.hashCode;
   }
 }
+

@@ -33,13 +33,20 @@ class UserProvider extends ChangeNotifier {
 
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  /// Register user baru dengan biodata
+  /// Register user baru dengan biodata & kuesioner awal
   Future<bool> registerUser({
     required String name,
     required String gender,
     required int age,
-    required String className,
-    required String school,
+    String? educationLevel,
+    String className = '',
+    String school = '',
+    String? isActiveSportsMember,
+    String? sportsDuration,
+    String? sportsFrequency,
+    String? sportsLiking,
+    String? hasSportsCompetition,
+    String? likesSportsCompetition,
   }) async {
     _setLoading(true);
     _clearError();
@@ -50,8 +57,15 @@ class UserProvider extends ChangeNotifier {
         name: name,
         gender: gender,
         age: age,
+        educationLevel: educationLevel,
         className: className,
         school: school,
+        isActiveSportsMember: isActiveSportsMember,
+        sportsDuration: sportsDuration,
+        sportsFrequency: sportsFrequency,
+        sportsLiking: sportsLiking,
+        hasSportsCompetition: hasSportsCompetition,
+        likesSportsCompetition: likesSportsCompetition,
       );
 
       print('UserProvider: Attempting to register user: ${user.toJson()}');

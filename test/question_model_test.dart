@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/data/models/question_model.dart';
+import 'package:child_games/data/models/question_model.dart';
 
 void main() {
   group('QuestionModel Media Detection Tests', () {
