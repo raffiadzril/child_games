@@ -132,39 +132,41 @@ class _BiodataDialogState extends State<BiodataDialog>
 
     return Dialog(
       backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: SlideTransition(
         position: _slideAnimation,
         child: ScaleTransition(
           scale: _bounceAnimation,
           child: ColorfulCard(
             gradient: dialogGradient,
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.92,
+            child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: 440,
-                maxHeight: MediaQuery.of(context).size.height * 0.85,
+                maxHeight: MediaQuery.of(context).size.height * 0.88,
               ),
-              padding: const EdgeInsets.all(AppDimensions.paddingL),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Step Indicator Header
-                  _buildStepHeader(isAdultMode),
-                  const SizedBox(height: AppDimensions.marginM),
+              child: Padding(
+                padding: const EdgeInsets.all(AppDimensions.paddingL),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Step Indicator Header
+                    _buildStepHeader(isAdultMode),
+                    const SizedBox(height: AppDimensions.marginM),
 
-                  // Main Scrollable Content (Step 1 vs Step 2)
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: _currentStep == 0
-                          ? _buildStep1Identitas()
-                          : _buildStep2TentangAnda(),
+                    // Main Scrollable Content — Flexible shrinks to content, no big gap
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child: _currentStep == 0
+                            ? _buildStep1Identitas()
+                            : _buildStep2TentangAnda(),
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: AppDimensions.marginL),
-                  // Buttons Footer
-                  _buildFooterButtons(),
-                ],
+                    const SizedBox(height: AppDimensions.marginL),
+                    // Buttons Footer
+                    _buildFooterButtons(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -176,23 +178,19 @@ class _BiodataDialogState extends State<BiodataDialog>
   Widget _buildStepHeader(bool isAdultMode) {
     return Column(
       children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildStepBadge(step: 0, title: 'Identitas'),
-              Container(
-                width: 24,
-                height: 2,
-                color: Colors.white.withOpacity(0.4),
-                margin: const EdgeInsets.symmetric(horizontal: 6),
-              ),
-              _buildStepBadge(step: 1, title: 'Tentang Anda'),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppDimensions.marginM),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(child: _buildStepBadge(step: 0, title: 'Identitas')),
+            Container(
+              width: 24,
+              height: 2,
+              color: Colors.white.withOpacity(0.4),
+              margin: const EdgeInsets.symmetric(horizontal: 6),
+            ),
+            Flexible(child: _buildStepBadge(step: 1, title: 'Tentang Anda')),
+          ],
+        ),        const SizedBox(height: AppDimensions.marginM),
         Text(
           _currentStep == 0
               ? (isAdultMode ? 'Formulir Data Diri' : 'Halo, Kenalan Dulu Yuk!')
@@ -223,7 +221,7 @@ class _BiodataDialogState extends State<BiodataDialog>
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: isActive
             ? Colors.white
@@ -237,23 +235,27 @@ class _BiodataDialogState extends State<BiodataDialog>
         mainAxisSize: MainAxisSize.min,
         children: [
           if (isDone)
-            const Icon(Icons.check_circle, size: 14, color: Colors.white)
+            const Icon(Icons.check_circle, size: 13, color: Colors.white)
           else
             Text(
               '${step + 1}',
               style: TextStyle(
                 color: isActive ? const Color(0xFF311B92) : Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
+                fontSize: 11,
               ),
             ),
-          const SizedBox(width: 6),
-          Text(
-            title,
-            style: TextStyle(
-              color: isActive ? const Color(0xFF311B92) : Colors.white,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-              fontSize: 12,
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              title,
+              style: TextStyle(
+                color: isActive ? const Color(0xFF311B92) : Colors.white,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                fontSize: 11,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],
@@ -376,7 +378,7 @@ class _BiodataDialogState extends State<BiodataDialog>
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
           color: isSelected
               ? Colors.white.withOpacity(0.25)
@@ -387,21 +389,20 @@ class _BiodataDialogState extends State<BiodataDialog>
             width: isSelected ? 2 : 1,
           ),
         ),
-        child: Row(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: Colors.white, size: 20),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                label,
-                style: AppFonts.bodySmall.copyWith(
-                  color: Colors.white,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
+            Icon(icon, color: Colors.white, size: 22),
+            const SizedBox(height: 5),
+            Text(
+              label,
+              style: AppFonts.bodySmall.copyWith(
+                color: Colors.white,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 13,
               ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
             ),
           ],
         ),
@@ -481,10 +482,8 @@ class _BiodataDialogState extends State<BiodataDialog>
       });
     }
 
-    // Label hint sesuai mode
-    final hintLabel = ageCategory == '<13'
-        ? 'Pilih Jenjang Sekolah (Anak)'
-        : 'Pilih Jenjang Pendidikan';
+    // Label hint sesuai mode — dibuat singkat agar tidak overflow
+    final hintLabel = ageCategory == '<13' ? 'Pilih Jenjang' : 'Pilih Jenjang';
 
     // Warna dropdown sesuai tema mode
     final dropdownBgColor = isAdultMode
