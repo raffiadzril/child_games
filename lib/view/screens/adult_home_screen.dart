@@ -190,7 +190,8 @@ class _AdultHomeScreenState extends State<AdultHomeScreen> {
         children: [
           // Logo & Category Badge
           Container(
-            padding: const EdgeInsets.all(8),
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: const Color(0xFFEEF2FF),
               borderRadius: BorderRadius.circular(AppRadius.radiusM),
@@ -198,10 +199,15 @@ class _AdultHomeScreenState extends State<AdultHomeScreen> {
                 color: const Color(0xFFC7D2FE),
               ),
             ),
-            child: const Icon(
-              Icons.shield_outlined,
-              color: Color(0xFF4F46E5),
-              size: 24,
+            padding: const EdgeInsets.all(6),
+            child: Image.network(
+              'https://jokvxdrxswytjjhxuhvk.supabase.co/storage/v1/object/public/challenges/logo.png',
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => const Icon(
+                Icons.shield_outlined,
+                color: Color(0xFF4F46E5),
+                size: 24,
+              ),
             ),
           ),
           const SizedBox(width: 12),

@@ -50,13 +50,22 @@ class _ChallengesGridState extends State<ChallengesGrid> {
       return allChallenges;
     }
     if (_activeFilterCategory == '<13') {
+      // Exclude semua challenge yang mengandung '13' di title atau category
       return allChallenges
-          .where((c) => c.category != 'REI 13+' && !c.title.contains('13+'))
+          .where((c) =>
+              c.category != 'REI 13+' &&
+              !c.title.contains('13+') &&
+              !c.title.contains('13 Tahun') &&
+              !c.title.toLowerCase().contains('ke atas'))
           .toList();
     }
     if (_activeFilterCategory == '>=13') {
       return allChallenges
-          .where((c) => c.category == 'REI 13+' || c.title.contains('13+'))
+          .where((c) =>
+              c.category == 'REI 13+' ||
+              c.title.contains('13+') ||
+              c.title.contains('13 Tahun') ||
+              c.title.toLowerCase().contains('ke atas'))
           .toList();
     }
     return allChallenges;
@@ -114,12 +123,15 @@ class _ChallengesGridState extends State<ChallengesGrid> {
 
         final filteredChallenges = _getFilteredChallenges(challengeProvider.challenges);
 
+        // Di mode anak (<13), sembunyikan filter bar dan langsung tampilkan cards
+        final isChildMode = userProvider.selectedAgeCategory == '<13';
+
         return Column(
           children: [
-            // Filter Bar Kategori Usia
-            _buildAgeFilterBar(userProvider),
+            // Filter Bar Kategori Usia — disembunyikan saat mode anak
+            if (!isChildMode) _buildAgeFilterBar(userProvider),
 
-            const SizedBox(height: AppDimensions.marginS),
+            if (!isChildMode) const SizedBox(height: AppDimensions.marginS),
 
             // Challenges List
             Expanded(

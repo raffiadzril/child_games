@@ -45,12 +45,19 @@ class _BiodataDialogState extends State<BiodataDialog>
   late Animation<Offset> _slideAnimation;
   late Animation<double> _bounceAnimation;
 
-  final List<String> _educationOptions = [
-    'SMP',
-    'SMA',
-    'Perguruan Tinggi',
-    'Umum',
-  ];
+  /// Opsi pendidikan berdasarkan mode usia yang dipilih user
+  List<String> _getEducationOptions(String? ageCategory) {
+    if (ageCategory == '<13') {
+      // Mode anak: hanya SD dan SMP
+      return ['SD', 'SMP'];
+    } else if (ageCategory == '>=13') {
+      // Mode dewasa: SMP ke atas
+      return ['SMP', 'SMA', 'Perguruan Tinggi', 'Umum'];
+    } else {
+      // Semua usia
+      return ['SD', 'SMP', 'SMA', 'Perguruan Tinggi', 'Umum'];
+    }
+  }
 
   final List<String> _yesNoOptions = ['Ya', 'Tidak'];
 
@@ -169,18 +176,21 @@ class _BiodataDialogState extends State<BiodataDialog>
   Widget _buildStepHeader(bool isAdultMode) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildStepBadge(step: 0, title: '1. Identitas'),
-            Container(
-              width: 30,
-              height: 2,
-              color: Colors.white.withOpacity(0.4),
-              margin: const EdgeInsets.symmetric(horizontal: 8),
-            ),
-            _buildStepBadge(step: 1, title: '2. Tentang Anda'),
-          ],
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildStepBadge(step: 0, title: 'Identitas'),
+              Container(
+                width: 24,
+                height: 2,
+                color: Colors.white.withOpacity(0.4),
+                margin: const EdgeInsets.symmetric(horizontal: 6),
+              ),
+              _buildStepBadge(step: 1, title: 'Tentang Anda'),
+            ],
+          ),
         ),
         const SizedBox(height: AppDimensions.marginM),
         Text(
@@ -458,14 +468,37 @@ class _BiodataDialogState extends State<BiodataDialog>
   }
 
   Widget _buildEducationLevelDropdown() {
+    final userProvider = context.read<UserProvider>();
+    final ageCategory = userProvider.selectedAgeCategory;
+    final isAdultMode = userProvider.isAdultMode;
+    final options = _getEducationOptions(ageCategory);
+
+    // Reset pilihan jika tidak ada di list opsi yang aktif
+    if (_selectedEducationLevel != null &&
+        !options.contains(_selectedEducationLevel)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() => _selectedEducationLevel = null);
+      });
+    }
+
+    // Label hint sesuai mode
+    final hintLabel = ageCategory == '<13'
+        ? 'Pilih Jenjang Sekolah (Anak)'
+        : 'Pilih Jenjang Pendidikan';
+
+    // Warna dropdown sesuai tema mode
+    final dropdownBgColor = isAdultMode
+        ? const Color(0xFF1E1B4B)   // mode dewasa: dark navy
+        : const Color(0xFF5A63E8);  // mode anak: ungu terang
+
     return DropdownButtonFormField<String>(
       value: _selectedEducationLevel,
-      dropdownColor: const Color(0xFF1E1B4B),
+      dropdownColor: dropdownBgColor,
       style: const TextStyle(color: Colors.white),
       iconEnabledColor: Colors.white,
       decoration: InputDecoration(
         labelText: 'Jenjang Sekolah',
-        hintText: 'Pilih Jenjang Sekolah',
+        hintText: hintLabel,
         prefixIcon: const Icon(Icons.school, color: Colors.white70),
         labelStyle: TextStyle(color: Colors.white.withOpacity(0.9)),
         hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
@@ -488,7 +521,7 @@ class _BiodataDialogState extends State<BiodataDialog>
         filled: true,
         fillColor: Colors.white.withOpacity(0.1),
       ),
-      items: _educationOptions.map((String option) {
+      items: options.map((String option) {
         return DropdownMenuItem<String>(
           value: option,
           child: Text(option, style: const TextStyle(color: Colors.white)),
