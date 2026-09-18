@@ -12,6 +12,7 @@ import '../../providers/user_provider.dart';
 import '../widgets/question_widget.dart';
 import '../widgets/animated_gradient_background.dart';
 import '../widgets/rei_result_widget.dart';
+import '../widgets/quiz_review_widget.dart';
 
 /// Screen untuk menampilkan quiz dengan animasi dan transisi
 class QuizScreen extends StatefulWidget {
@@ -103,7 +104,18 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
 
     final bodyWidget = Consumer<QuizProvider>(
       builder: (context, quizProvider, child) {
-        // Loading state
+        // Review mode state — tampilkan setelah soal terakhir dijawab
+        // Cek ini PERTAMA agar tidak terblokir oleh isLoading
+        if (quizProvider.isReviewMode) {
+          return const QuizReviewWidget();
+        }
+
+        // Quiz completed state — juga dicek sebelum loading
+        if (quizProvider.isQuizCompleted) {
+          return _buildQuizResult(quizProvider);
+        }
+
+        // Loading state (hanya saat load soal pertama kali)
         if (quizProvider.isLoading) {
           return _buildLoadingState(isAdultMode);
         }
@@ -111,11 +123,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
         // Error state
         if (quizProvider.hasError) {
           return _buildErrorState(quizProvider);
-        }
-
-        // Quiz completed state
-        if (quizProvider.isQuizCompleted) {
-          return _buildQuizResult(quizProvider);
         }
 
         // Quiz active state
@@ -155,13 +162,14 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                           question: quizProvider.currentQuestion!,
                           options: quizProvider.currentOptions!,
                           isLastQuestion: quizProvider.isLastQuestion,
+                          preSelectedOptionId: quizProvider
+                              .getSelectedOptionForQuestion(
+                                quizProvider.currentQuestion!.id,
+                              ),
                           onAnswerSelected: (optionId) async {
                             if (mounted) {
-                              final userProvider =
-                                  context.read<UserProvider>();
                               await quizProvider.submitAnswer(
                                 optionId,
-                                userProvider: userProvider,
                               );
                             }
                           },

@@ -9,6 +9,7 @@ import '../../core/services/sound_service.dart';
 import '../../data/models/question_model.dart';
 import '../../data/models/option_model.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/quiz_provider.dart';
 import 'question_media_widget.dart';
 
 /// Widget untuk menampilkan pertanyaan dan opsi jawaban
@@ -17,6 +18,7 @@ class QuestionWidget extends StatefulWidget {
   final List<OptionModel> options;
   final Function(String) onAnswerSelected;
   final bool isLastQuestion;
+  final String? preSelectedOptionId; // Pre-select jawaban jika kembali dari review
 
   const QuestionWidget({
     super.key,
@@ -24,6 +26,7 @@ class QuestionWidget extends StatefulWidget {
     required this.options,
     required this.onAnswerSelected,
     this.isLastQuestion = false,
+    this.preSelectedOptionId,
   });
 
   @override
@@ -46,6 +49,9 @@ class _QuestionWidgetState extends State<QuestionWidget>
   @override
   void initState() {
     super.initState();
+
+    // Pre-select jawaban jika ada (kembali dari review screen)
+    _selectedOptionId = widget.preSelectedOptionId;
 
     _optionsController = AnimationController(
       duration: Duration(milliseconds: 800 + (widget.options.length * 100)),
@@ -277,7 +283,12 @@ class _QuestionWidgetState extends State<QuestionWidget>
                               ),
                             ),
                             child: Text(
-                              widget.isLastQuestion ? 'Selesai' : 'Lanjutkan',
+                              (widget.preSelectedOptionId != null ||
+                                      context
+                                          .watch<QuizProvider>()
+                                          .isEditingFromReview)
+                                  ? 'Simpan & Kembali ke Review'
+                                  : (widget.isLastQuestion ? 'Selesai' : 'Lanjutkan'),
                               style: AppFonts.gameButton.copyWith(
                                 color: Colors.white,
                               ),

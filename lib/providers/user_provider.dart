@@ -90,7 +90,7 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  /// Simpan jawaban user
+  /// Simpan jawaban user (single)
   Future<bool> saveUserAnswer({
     required String questionId,
     required String selectedOptionId,
@@ -101,7 +101,6 @@ class UserProvider extends ChangeNotifier {
     }
 
     try {
-      // Buat user answer model
       final userAnswer = UserAnswerModel(
         userId: _currentUser!.id,
         questionId: questionId,
@@ -110,17 +109,23 @@ class UserProvider extends ChangeNotifier {
 
       print('UserProvider: Attempting to save answer: ${userAnswer.toJson()}');
 
-      // Insert ke Supabase
-      final response =
-          await _supabase
-              .from('user_answers')
-              .insert(userAnswer.toJson())
-              .select()
-              .single();
+      // Delete existing dulu (jika ada), lalu insert baru — tidak butuh unique constraint
+      await _supabase
+          .from('user_answers')
+          .delete()
+          .eq('user_id', _currentUser!.id)
+          .eq('question_id', questionId);
+
+      final response = await _supabase
+          .from('user_answers')
+          .insert(userAnswer.toJson())
+          .select()
+          .single();
 
       print('UserProvider: Answer saved successfully: $response');
 
-      // Tambah ke local list
+      // Update local list
+      _userAnswers.removeWhere((a) => a.questionId == questionId);
       final savedAnswer = UserAnswerModel.fromJson(response);
       _userAnswers.add(savedAnswer);
 
@@ -128,6 +133,63 @@ class UserProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       print('UserProvider: Error saving answer: $e');
+      _setError('Gagal menyimpan jawaban: $e');
+      return false;
+    }
+  }
+
+  /// Simpan SEMUA jawaban quiz sekaligus (bulk) — lebih reliable dari save satu per satu
+  /// Strategi: DELETE semua jawaban lama untuk soal-soal ini, lalu INSERT semuanya sekaligus
+  Future<bool> saveAllAnswersBulk({
+    required List<Map<String, String>> answers,
+  }) async {
+    if (_currentUser == null) {
+      _setError('User belum login');
+      return false;
+    }
+
+    if (answers.isEmpty) return true;
+
+    try {
+      final userId = _currentUser!.id;
+      final questionIds = answers.map((a) => a['questionId']!).toList();
+
+      print('UserProvider: Bulk saving ${answers.length} answers...');
+
+      // 1. Hapus semua jawaban lama untuk soal-soal ini
+      await _supabase
+          .from('user_answers')
+          .delete()
+          .eq('user_id', userId)
+          .inFilter('question_id', questionIds);
+
+      // 2. Buat payload bulk insert
+      final now = DateTime.now().toIso8601String();
+      final payload = answers.map((a) => {
+        'user_id': userId,
+        'question_id': a['questionId']!,
+        'selected_option_id': a['selectedOptionId']!,
+        'answered_at': now,
+      }).toList();
+
+      // 3. Bulk insert semua sekaligus
+      final response = await _supabase
+          .from('user_answers')
+          .insert(payload)
+          .select();
+
+      print('UserProvider: Bulk save success — ${response.length} answers saved');
+
+      // Update local list
+      _userAnswers.removeWhere((a) => questionIds.contains(a.questionId));
+      _userAnswers.addAll(
+        response.map((json) => UserAnswerModel.fromJson(json)).toList(),
+      );
+
+      notifyListeners();
+      return true;
+    } catch (e) {
+      print('UserProvider: Error bulk saving answers: $e');
       _setError('Gagal menyimpan jawaban: $e');
       return false;
     }
