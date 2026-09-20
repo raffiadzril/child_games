@@ -548,8 +548,7 @@ class _BiodataDialogState extends State<BiodataDialog>
         // Question 1
         _buildQuestionCard(
           number: 1,
-          question:
-              'Apakah Anda saat ini aktif mengikuti latihan olahraga sebagai anggota tim sekolah atau klub olahraga?',
+          question: 'Apakah Anda saat ini aktif mengikuti kegiatan olahraga?',
           child: _buildChoiceChips(
             options: _yesNoOptions,
             selectedValue: _isActiveSportsMember,
@@ -561,10 +560,9 @@ class _BiodataDialogState extends State<BiodataDialog>
         // Question 2
         _buildQuestionCard(
           number: 2,
-          question:
-              'Berapa lama Anda telah aktif mengikuti latihan olahraga di sekolah atau klub?',
+          question: 'Berapa lama Anda telah aktif mengikuti kegiatan olahraga?',
           child: _buildDropdownQuestion(
-            hint: 'Pilihan Lama Latihan',
+            hint: 'Pilihan Lama Kegiatan',
             options: _durationOptions,
             selectedValue: _sportsDuration,
             onChanged: (val) => setState(() => _sportsDuration = val),
@@ -576,7 +574,7 @@ class _BiodataDialogState extends State<BiodataDialog>
         _buildQuestionCard(
           number: 3,
           question:
-              'Dalam satu minggu, seberapa sering Anda mengikuti latihan atau kegiatan olahraga di luar pelajaran PJOK?',
+              'Dalam 1 minggu, berapa kali Anda mengikuti latihan atau kegiatan olahraga?',
           child: _buildDropdownQuestion(
             hint: 'Pilihan Frekuensi Seminggu',
             options: _frequencyOptions,
