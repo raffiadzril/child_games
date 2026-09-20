@@ -95,6 +95,12 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
             // Header dengan animasi pulse
             _buildHeader(isAdultMode),
 
+            // Banner Kode Hasil Unik untuk Mode 13+
+            if (isAdultMode) ...[
+              const SizedBox(height: AppDimensions.marginM),
+              _buildUniqueCodeCard(isAdultMode),
+            ],
+
             const SizedBox(height: AppDimensions.marginL),
 
             // Score cards
@@ -780,6 +786,111 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
             fontWeight: FontWeight.bold,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildUniqueCodeCard(bool isAdultMode) {
+    // Generate code on the fly if model uniqueCode is empty
+    String displayCode = widget.reiResult.uniqueCode ?? '';
+    if (displayCode.isEmpty) {
+      final rPct = ((widget.reiResult.respect / 15.0) * 20.0).clamp(0.0, 100.0);
+      final ePct = ((widget.reiResult.equity / 15.0) * 20.0).clamp(0.0, 100.0);
+      final iPct = ((widget.reiResult.inclusion / 15.0) * 20.0).clamp(0.0, 100.0);
+      final oPct = (((rPct + ePct + iPct) / 3.0)).clamp(0.0, 100.0);
+      final codeId = (widget.reiResult.id.hashCode & 0xFFFFFF).toRadixString(16).toUpperCase().padLeft(6, '0');
+      displayCode = 'REI13-${rPct.toStringAsFixed(1)}-${ePct.toStringAsFixed(1)}-${iPct.toStringAsFixed(1)}-${oPct.toStringAsFixed(1)}-$codeId';
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: AppDimensions.marginS),
+      padding: const EdgeInsets.all(AppDimensions.paddingL),
+      decoration: BoxDecoration(
+        color: isAdultMode ? const Color(0xFFEEF2FF) : Colors.amber.shade900.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(AppRadius.radiusCard),
+        border: Border.all(
+          color: isAdultMode ? const Color(0xFF6366F1) : Colors.amber,
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.vpn_key_rounded,
+                color: isAdultMode ? const Color(0xFF4F46E5) : Colors.amber,
+                size: 22,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Kode Unik Hasil Asesmen REI (13+)',
+                  style: AppFonts.headlineSmall.copyWith(
+                    color: isAdultMode ? const Color(0xFF1E1B4B) : Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Salin kode di bawah dan masukkan ke Athlete Dashboard untuk mengklaim hasil tes Anda:',
+            style: AppFonts.bodySmall.copyWith(
+              color: isAdultMode ? const Color(0xFF4338CA) : Colors.white70,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: isAdultMode ? Colors.white : Colors.black45,
+              borderRadius: BorderRadius.circular(AppRadius.radiusM),
+              border: Border.all(
+                color: isAdultMode ? const Color(0xFFC7D2FE) : Colors.white24,
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: SelectableText(
+                    displayCode,
+                    style: AppFonts.bodyLarge.copyWith(
+                      color: isAdultMode ? const Color(0xFF1E1B4B) : Colors.amberAccent,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'monospace',
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: displayCode));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('✅ Kode hasil REI berhasil disalin! Masukkan ke Athlete Dashboard.'),
+                        backgroundColor: Color(0xFF059669),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.copy_rounded, size: 14),
+                  label: const Text('Salin Kode'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isAdultMode ? const Color(0xFF4F46E5) : AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

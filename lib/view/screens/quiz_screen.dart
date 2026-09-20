@@ -188,7 +188,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
       floatingActionButton: AppConfig.isDeveloperMode
           ? Consumer<QuizProvider>(
               builder: (context, quizProvider, child) {
-                if (quizProvider.isQuizCompleted || quizProvider.isLoading) {
+                if (quizProvider.isQuizCompleted) {
                   return const SizedBox.shrink();
                 }
                 return FloatingActionButton.extended(
@@ -363,6 +363,34 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
         ),
         onPressed: () => _navigateBack(),
       ),
+      actions: [
+        if (AppConfig.isDeveloperMode)
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Center(
+              child: TextButton.icon(
+                onPressed: () => _showDeveloperAutoFillDialog(context.read<QuizProvider>()),
+                icon: const Icon(Icons.bug_report_rounded, color: Color(0xFF4F46E5), size: 16),
+                label: const Text(
+                  'DEV: Auto-Fill',
+                  style: TextStyle(
+                    color: Color(0xFF4F46E5),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  backgroundColor: const Color(0xFFEEF2FF),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: const BorderSide(color: Color(0xFF818CF8)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 

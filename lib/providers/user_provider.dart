@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../data/models/user_model.dart';
@@ -406,6 +407,13 @@ class UserProvider extends ChangeNotifier {
         }
       }
 
+      final respectPct = (respectMean * 20.0).clamp(0.0, 100.0);
+      final equityPct = (equityMean * 20.0).clamp(0.0, 100.0);
+      final inclusionPct = (inclusionMean * 20.0).clamp(0.0, 100.0);
+      final overallPct = (overallMean * 20.0).clamp(0.0, 100.0);
+      final randomId = Random().nextInt(0xFFFFFF).toRadixString(16).toUpperCase().padLeft(6, '0');
+      final generatedUniqueCode = 'REI13-${respectPct.toStringAsFixed(1)}-${equityPct.toStringAsFixed(1)}-${inclusionPct.toStringAsFixed(1)}-${overallPct.toStringAsFixed(1)}-$randomId';
+
       final payload = {
         'user_id': _currentUser!.id,
         'respect': respectScore,
@@ -425,10 +433,32 @@ class UserProvider extends ChangeNotifier {
 
       print('UserProvider: Saving calculated REI result to Supabase: $payload');
 
-      final response =
-          await _supabase.from('rei_accumulate').upsert(payload).select().single();
+      try {
+        final response =
+            await _supabase.from('rei_accumulate').upsert(payload).select().single();
+        _reiResult = ReiAccumulateModel.fromJson(response).copyWith(uniqueCode: generatedUniqueCode);
+      } catch (dbErr) {
+        print('UserProvider: Supabase upsert error (using local model fallback): $dbErr');
+        _reiResult = ReiAccumulateModel(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          userId: _currentUser!.id,
+          respect: respectScore,
+          equity: equityScore,
+          inclusion: inclusionScore,
+          respectCategory: respectCat,
+          equityCategory: equityCat,
+          inclusionCategory: inclusionCat,
+          allCategory: overallCat,
+          respectNote: getRespectNote(respectCat),
+          equityNote: getEquityNote(equityCat),
+          inclusionNote: getInclusionNote(inclusionCat),
+          allNote: 'Hasil Evaluasi REI 2026: Kategori $overallCat (Rerata: ${overallMean.toStringAsFixed(2)})',
+          uniqueCode: generatedUniqueCode,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+      }
 
-      _reiResult = ReiAccumulateModel.fromJson(response);
       _setLoading(false);
       notifyListeners();
       return _reiResult;

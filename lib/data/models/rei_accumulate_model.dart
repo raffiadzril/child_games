@@ -22,6 +22,7 @@ class ReiAccumulateModel extends BaseModel {
   final String?
   inclusionCategory; // supports both inclusion_category/inclussion_category
   final String? inclusionNote;
+  final String? uniqueCode;
   @override
   final DateTime createdAt;
   @override
@@ -45,6 +46,7 @@ class ReiAccumulateModel extends BaseModel {
     this.equityNote,
     this.inclusionCategory,
     this.inclusionNote,
+    this.uniqueCode,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -76,6 +78,7 @@ class ReiAccumulateModel extends BaseModel {
       inclusionNote:
           (json['inclusion_note'] as String?) ??
           (json['inclussion_note'] as String?),
+      uniqueCode: json['unique_code'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.now(), // Tidak ada updated_at di tabel
     );
@@ -125,6 +128,7 @@ class ReiAccumulateModel extends BaseModel {
     String? equityNote,
     String? inclusionCategory,
     String? inclusionNote,
+    String? uniqueCode,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -151,6 +155,7 @@ class ReiAccumulateModel extends BaseModel {
       equityNote: equityNote ?? this.equityNote,
       inclusionCategory: inclusionCategory ?? this.inclusionCategory,
       inclusionNote: inclusionNote ?? this.inclusionNote,
+      uniqueCode: uniqueCode ?? this.uniqueCode,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

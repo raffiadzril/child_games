@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../core/config/app_config.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/radius.dart';
@@ -168,6 +169,36 @@ class _AdultHomeScreenState extends State<AdultHomeScreen> {
           ],
         ),
       ),
+      floatingActionButton: AppConfig.isDeveloperMode
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                final challengeProvider = context.read<ChallengeProvider>();
+                late ChallengeModel adultChallenge;
+                try {
+                  adultChallenge = challengeProvider.challenges.firstWhere(
+                    (c) => c.id == 'a1b2c3d4-e5f6-7890-abcd-131313131313' || (c.title.contains('13+')),
+                  );
+                } catch (_) {
+                  adultChallenge = ChallengeModel(
+                    id: 'a1b2c3d4-e5f6-7890-abcd-131313131313',
+                    title: 'Assesmen REI (13+ Tahun)',
+                    description: 'Kuesioner Respect, Equity, & Inclusion untuk usia 13 tahun ke atas',
+                    category: 'REI 13+',
+                    createdAt: DateTime.now(),
+                    updatedAt: DateTime.now(),
+                  );
+                }
+                _startAdultAssessment(adultChallenge);
+              },
+              backgroundColor: const Color(0xFF4F46E5),
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.bug_report_rounded),
+              label: const Text(
+                'DEV: Tes 13+ (Auto-Fill)',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+            )
+          : null,
     );
   }
 
