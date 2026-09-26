@@ -1,6 +1,0 @@
-Not searching for unused variables given on the command line.
--- The C compiler identification is unknown
--- The CXX compiler identification is unknown
--- Configuring incomplete, errors occurred!
-See also "C:/kuliah/gawean/child-games/child_games/android/app/.cxx/RelWithDebInfo/4e40h2p6/arm64-v8a/CMakeFiles/CMakeOutput.log".
-See also "C:/kuliah/gawean/child-games/child_games/android/app/.cxx/RelWithDebInfo/4e40h2p6/arm64-v8a/CMakeFiles/CMakeError.log".

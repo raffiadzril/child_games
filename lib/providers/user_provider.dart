@@ -42,12 +42,15 @@ class UserProvider extends ChangeNotifier {
     String? educationLevel,
     String className = '',
     String school = '',
+    String? surveyType,
     String? isActiveSportsMember,
     String? sportsDuration,
     String? sportsFrequency,
     String? sportsLiking,
     String? hasSportsCompetition,
     String? likesSportsCompetition,
+    String? competitionType,
+    String? competitionLevel,
   }) async {
     _setLoading(true);
     _clearError();
@@ -61,12 +64,15 @@ class UserProvider extends ChangeNotifier {
         educationLevel: educationLevel,
         className: className,
         school: school,
+        surveyType: surveyType,
         isActiveSportsMember: isActiveSportsMember,
         sportsDuration: sportsDuration,
         sportsFrequency: sportsFrequency,
         sportsLiking: sportsLiking,
         hasSportsCompetition: hasSportsCompetition,
         likesSportsCompetition: likesSportsCompetition,
+        competitionType: competitionType,
+        competitionLevel: competitionLevel,
       );
 
       print('UserProvider: Attempting to register user: ${user.toJson()}');

@@ -24,7 +24,10 @@ class _BiodataDialogState extends State<BiodataDialog>
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
 
-  int _currentStep = 0; // 0: Identitas, 1: Tentang Anda
+  int _currentStep = 0; // 0: Jenis Survei (PRE/POST), 1: Identitas, 2: Tentang Anda
+
+  // Step 0: Jenis Survei
+  String? _selectedSurveyType; // 'PRE' atau 'POST'
 
   // Step 1: Identitas
   String _selectedGender = '';
@@ -37,6 +40,10 @@ class _BiodataDialogState extends State<BiodataDialog>
   String? _sportsLiking;
   String? _hasSportsCompetition;
   String? _likesSportsCompetition;
+  String? _competitionType;
+  String? _competitionLevel;
+
+  String? _dialogErrorMessage;
 
   bool _isSubmitting = false;
 
@@ -61,6 +68,17 @@ class _BiodataDialogState extends State<BiodataDialog>
 
   final List<String> _yesNoOptions = ['Ya', 'Tidak'];
 
+  final List<String> _competitionTypeOptions = ['Beregu', 'Individu', 'Keduanya'];
+
+  final List<String> _competitionLevelOptions = [
+    'Internasional',
+    'Nasional',
+    'Provinsi',
+    'Kabupaten',
+    'Kecamatan',
+    'Belum Pernah Juara',
+  ];
+
   final List<String> _durationOptions = [
     'Tidak pernah aktif',
     'Kurang dari 1 tahun',
@@ -78,11 +96,11 @@ class _BiodataDialogState extends State<BiodataDialog>
   ];
 
   final List<String> _likingOptions = [
-    'Sangat tidak menyukai',
-    'Tidak menyukai',
-    'Biasa saja',
-    'Menyukai',
     'Sangat menyukai',
+    'Menyukai',
+    'Biasa saja',
+    'Tidak menyukai',
+    'Sangat tidak menyukai',
   ];
 
   @override
@@ -157,12 +175,20 @@ class _BiodataDialogState extends State<BiodataDialog>
                     Flexible(
                       child: SingleChildScrollView(
                         child: _currentStep == 0
-                            ? _buildStep1Identitas()
-                            : _buildStep2TentangAnda(),
+                            ? _buildStep0SurveyType()
+                            : (_currentStep == 1
+                                ? _buildStep1Identitas()
+                                : _buildStep2TentangAnda()),
                       ),
                     ),
 
-                    const SizedBox(height: AppDimensions.marginL),
+                    // Inline Error Banner jika ada pesan peringatan
+                    if (_dialogErrorMessage != null) ...[
+                      const SizedBox(height: 10),
+                      _buildInlineErrorBanner(),
+                    ],
+
+                    const SizedBox(height: AppDimensions.marginM),
                     // Buttons Footer
                     _buildFooterButtons(),
                   ],
@@ -176,25 +202,45 @@ class _BiodataDialogState extends State<BiodataDialog>
   }
 
   Widget _buildStepHeader(bool isAdultMode) {
+    String title = '';
+    String subtitle = '';
+
+    if (_currentStep == 0) {
+      title = 'Pilih Jenis Evaluasi';
+      subtitle = 'Pilih kategori survei (PRE / POST) sebelum melanjutkan';
+    } else if (_currentStep == 1) {
+      title = isAdultMode ? 'Formulir Data Diri' : 'Halo, Kenalan Dulu Yuk!';
+      subtitle = 'Isi identitas diri untuk memulai assesmen';
+    } else {
+      title = 'Tentang Aktivitas Anda';
+      subtitle = 'Jawab pertanyaan seputar kebiasaan & minat olahraga';
+    }
+
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Flexible(child: _buildStepBadge(step: 0, title: 'Identitas')),
+            Flexible(child: _buildStepBadge(step: 0, title: 'Survei')),
             Container(
-              width: 24,
+              width: 14,
               height: 2,
               color: Colors.white.withOpacity(0.4),
-              margin: const EdgeInsets.symmetric(horizontal: 6),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
             ),
-            Flexible(child: _buildStepBadge(step: 1, title: 'Tentang Anda')),
+            Flexible(child: _buildStepBadge(step: 1, title: 'Identitas')),
+            Container(
+              width: 14,
+              height: 2,
+              color: Colors.white.withOpacity(0.4),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+            ),
+            Flexible(child: _buildStepBadge(step: 2, title: 'Tentang Anda')),
           ],
-        ),        const SizedBox(height: AppDimensions.marginM),
+        ),
+        const SizedBox(height: AppDimensions.marginM),
         Text(
-          _currentStep == 0
-              ? (isAdultMode ? 'Formulir Data Diri' : 'Halo, Kenalan Dulu Yuk!')
-              : 'Tentang Aktivitas Anda',
+          title,
           style: AppFonts.headlineMedium.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -203,9 +249,7 @@ class _BiodataDialogState extends State<BiodataDialog>
         ),
         const SizedBox(height: 4),
         Text(
-          _currentStep == 0
-              ? 'Isi identitas diri untuk memulai assesmen'
-              : 'Jawab pertanyaan seputar kebiasaan & minat olahraga',
+          subtitle,
           style: AppFonts.bodySmall.copyWith(
             color: Colors.white.withOpacity(0.85),
           ),
@@ -259,6 +303,152 @@ class _BiodataDialogState extends State<BiodataDialog>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ================= STEP 0: JENIS SURVEI =================
+  Widget _buildStep0SurveyType() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        _buildSurveyOptionCard(
+          type: 'PRE',
+          title: 'SURVEI PRE (Evaluasi Awal)',
+          subtitle:
+              'Pilih opsi ini jika Anda mengikuti tes/evaluasi sebelum program atau kegiatan dimulai.',
+          icon: Icons.assignment_rounded,
+          accentColor: const Color(0xFF38BDF8),
+        ),
+        const SizedBox(height: 14),
+        _buildSurveyOptionCard(
+          type: 'POST',
+          title: 'SURVEI POST (Evaluasi Akhir)',
+          subtitle:
+              'Pilih opsi ini jika Anda mengikuti tes/evaluasi setelah menyelesaikan seluruh program atau kegiatan.',
+          icon: Icons.fact_check_rounded,
+          accentColor: const Color(0xFF4ADE80),
+        ),
+        if (_selectedSurveyType == null) ...[
+          const SizedBox(height: 16),
+          Center(
+            child: Text(
+              '* Silakan pilih salah satu opsi survei di atas untuk melanjutkan.',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSurveyOptionCard({
+    required String type,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color accentColor,
+  }) {
+    final isSelected = _selectedSurveyType == type;
+
+    return GestureDetector(
+      onTap: () async {
+        await SoundService.instance.playClickSound();
+        HapticFeedback.lightImpact();
+        setState(() {
+          _dialogErrorMessage = null;
+          _selectedSurveyType = type;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(AppRadius.radiusM),
+          border: Border.all(
+            color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
+            width: isSelected ? 2.5 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: accentColor.withOpacity(0.35),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? accentColor.withOpacity(0.2)
+                    : Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: isSelected ? accentColor : Colors.white,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: isSelected ? const Color(0xFF1E1B4B) : Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13.5,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: isSelected
+                          ? const Color(0xFF475569)
+                          : Colors.white.withOpacity(0.85),
+                      fontSize: 11.5,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? const Color(0xFF311B92) : Colors.transparent,
+                border: Border.all(
+                  color: isSelected
+                      ? const Color(0xFF311B92)
+                      : Colors.white.withOpacity(0.5),
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? const Icon(Icons.check, size: 14, color: Colors.white)
+                  : null,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -493,17 +683,21 @@ class _BiodataDialogState extends State<BiodataDialog>
     return DropdownButtonFormField<String>(
       value: _selectedEducationLevel,
       dropdownColor: dropdownBgColor,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: Colors.white, fontSize: 14),
       iconEnabledColor: Colors.white,
+      hint: Text(
+        hintLabel,
+        style: const TextStyle(color: Colors.white, fontSize: 14),
+      ),
       decoration: InputDecoration(
         labelText: 'Jenjang Sekolah',
         hintText: hintLabel,
         prefixIcon: const Icon(Icons.school, color: Colors.white70),
-        labelStyle: TextStyle(color: Colors.white.withOpacity(0.9)),
-        hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+        labelStyle: const TextStyle(color: Colors.white),
+        hintStyle: const TextStyle(color: Colors.white),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.radiusM),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.4)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.radiusM),
@@ -518,7 +712,7 @@ class _BiodataDialogState extends State<BiodataDialog>
           borderSide: const BorderSide(color: Colors.redAccent, width: 2),
         ),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
+        fillColor: Colors.white.withOpacity(0.15),
       ),
       items: options.map((String option) {
         return DropdownMenuItem<String>(
@@ -603,10 +797,97 @@ class _BiodataDialogState extends State<BiodataDialog>
           number: 5,
           question:
               'Apakah Anda pernah mengikuti kompetisi/lomba olahraga sebelumnya?',
-          child: _buildChoiceChips(
-            options: _yesNoOptions,
-            selectedValue: _hasSportsCompetition,
-            onSelected: (val) => setState(() => _hasSportsCompetition = val),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildChoiceChips(
+                options: _yesNoOptions,
+                selectedValue: _hasSportsCompetition,
+                onSelected: (val) {
+                  setState(() {
+                    _hasSportsCompetition = val;
+                    if (val != 'Ya') {
+                      _competitionType = null;
+                      _competitionLevel = null;
+                    }
+                  });
+                },
+              ),
+              AnimatedCrossFade(
+                firstChild: const SizedBox.shrink(),
+                secondChild: Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(AppRadius.radiusS),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.25),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.stars_rounded,
+                              color: Colors.amberAccent,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Detail Pengalaman Kompetisi:',
+                              style: AppFonts.bodySmall.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: context.watch<UserProvider>().isAdultMode ? 14.5 : 12.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'a. Kategori Olahraga:',
+                          style: AppFonts.bodySmall.copyWith(
+                            color: Colors.white.withOpacity(0.9),
+                            fontWeight: FontWeight.w500,
+                            fontSize: context.watch<UserProvider>().isAdultMode ? 14.0 : 12.0,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        _buildChoiceChips(
+                          options: _competitionTypeOptions,
+                          selectedValue: _competitionType,
+                          onSelected: (val) => setState(() => _competitionType = val),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'b. Tingkat Kejuaraan (tertinggi/pernah diikuti):',
+                          style: AppFonts.bodySmall.copyWith(
+                            color: Colors.white.withOpacity(0.9),
+                            fontWeight: FontWeight.w500,
+                            fontSize: context.watch<UserProvider>().isAdultMode ? 14.0 : 12.0,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        _buildDropdownQuestion(
+                          hint: 'Pilih Tingkat Kejuaraan',
+                          options: _competitionLevelOptions,
+                          selectedValue: _competitionLevel,
+                          onChanged: (val) => setState(() => _competitionLevel = val),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                crossFadeState: _hasSportsCompetition == 'Ya'
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 300),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: AppDimensions.marginM),
@@ -630,6 +911,8 @@ class _BiodataDialogState extends State<BiodataDialog>
     required String question,
     required Widget child,
   }) {
+    final isAdultMode = context.watch<UserProvider>().isAdultMode;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -653,10 +936,10 @@ class _BiodataDialogState extends State<BiodataDialog>
                 ),
                 child: Text(
                   '$number',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                    fontSize: isAdultMode ? 13 : 12,
                   ),
                 ),
               ),
@@ -667,7 +950,8 @@ class _BiodataDialogState extends State<BiodataDialog>
                   style: AppFonts.bodySmall.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
-                    height: 1.3,
+                    fontSize: isAdultMode ? 15.5 : 13.5,
+                    height: 1.35,
                   ),
                 ),
               ),
@@ -695,6 +979,9 @@ class _BiodataDialogState extends State<BiodataDialog>
               onTap: () async {
                 await SoundService.instance.playClickSound();
                 HapticFeedback.lightImpact();
+                if (_dialogErrorMessage != null) {
+                  setState(() => _dialogErrorMessage = null);
+                }
                 onSelected(opt);
               },
               child: AnimatedContainer(
@@ -714,7 +1001,7 @@ class _BiodataDialogState extends State<BiodataDialog>
                   style: TextStyle(
                     color: isSelected ? const Color(0xFF311B92) : Colors.white,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    fontSize: 13,
+                    fontSize: context.watch<UserProvider>().isAdultMode ? 14.5 : 13.0,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -732,24 +1019,33 @@ class _BiodataDialogState extends State<BiodataDialog>
     required String? selectedValue,
     required ValueChanged<String?> onChanged,
   }) {
+    final isAdultMode = context.watch<UserProvider>().isAdultMode;
+    final dropdownBgColor = isAdultMode
+        ? const Color(0xFF1E1B4B)   // mode dewasa: dark navy
+        : const Color(0xFF5A63E8);  // mode anak: ungu terang sesuai palet
+
     return DropdownButtonFormField<String>(
       value: selectedValue,
-      dropdownColor: const Color(0xFF1E1B4B),
-      style: const TextStyle(color: Colors.white),
+      dropdownColor: dropdownBgColor,
+      style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
       iconEnabledColor: Colors.white,
+      hint: Text(
+        hint,
+        style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w400),
+      ),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+        hintStyle: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w400),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.radiusS),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.4)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.radiusS),
           borderSide: const BorderSide(color: Colors.white, width: 2),
         ),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
+        fillColor: Colors.white.withOpacity(0.15),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
       items: options.map((String opt) {
@@ -763,8 +1059,53 @@ class _BiodataDialogState extends State<BiodataDialog>
       }).toList(),
       onChanged: (val) async {
         await SoundService.instance.playClickSound();
+        if (_dialogErrorMessage != null) {
+          setState(() => _dialogErrorMessage = null);
+        }
         onChanged(val);
       },
+    );
+  }
+
+  // ================= INLINE ERROR BANNER =================
+  Widget _buildInlineErrorBanner() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade900.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(AppRadius.radiusS),
+        border: Border.all(color: Colors.amberAccent, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.warning_amber_rounded, color: Colors.amberAccent, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              _dialogErrorMessage!,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                height: 1.3,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: () => setState(() => _dialogErrorMessage = null),
+            child: const Icon(Icons.close, color: Colors.white70, size: 18),
+          ),
+        ],
+      ),
     );
   }
 
@@ -779,8 +1120,11 @@ class _BiodataDialogState extends State<BiodataDialog>
                 ? null
                 : () async {
                     await SoundService.instance.playClickSound();
-                    if (_currentStep == 1) {
-                      setState(() => _currentStep = 0);
+                    if (_currentStep > 0) {
+                      setState(() {
+                        _dialogErrorMessage = null;
+                        _currentStep -= 1;
+                      });
                     } else {
                       Navigator.of(context).pop();
                     }
@@ -793,7 +1137,7 @@ class _BiodataDialogState extends State<BiodataDialog>
               ),
             ),
             child: Text(
-              _currentStep == 1 ? 'Kembali' : 'Batal',
+              _currentStep > 0 ? 'Kembali' : 'Batal',
               style: AppFonts.labelMedium.copyWith(
                 color: Colors.white.withOpacity(0.9),
               ),
@@ -813,6 +1157,8 @@ class _BiodataDialogState extends State<BiodataDialog>
                     ? null
                     : () {
                         if (_currentStep == 0) {
+                          _goToStep1();
+                        } else if (_currentStep == 1) {
                           _goToStep2();
                         } else {
                           _submitForm();
@@ -842,7 +1188,7 @@ class _BiodataDialogState extends State<BiodataDialog>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            _currentStep == 0 ? 'Lanjut' : 'Mulai!',
+                            _currentStep == 2 ? 'Mulai!' : 'Lanjut',
                             style: AppFonts.labelMedium.copyWith(
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFF311B92),
@@ -850,9 +1196,9 @@ class _BiodataDialogState extends State<BiodataDialog>
                           ),
                           const SizedBox(width: 4),
                           Icon(
-                            _currentStep == 0
-                                ? Icons.arrow_forward_rounded
-                                : Icons.check_circle_rounded,
+                            _currentStep == 2
+                                ? Icons.check_circle_rounded
+                                : Icons.arrow_forward_rounded,
                             size: 18,
                             color: const Color(0xFF311B92),
                           ),
@@ -866,10 +1212,29 @@ class _BiodataDialogState extends State<BiodataDialog>
     );
   }
 
+  void _goToStep1() async {
+    if (_selectedSurveyType == null) {
+      setState(() {
+        _dialogErrorMessage = 'Mohon pilih jenis survei (PRE atau POST) terlebih dahulu.';
+      });
+      return;
+    }
+
+    await SoundService.instance.playClickSound();
+    HapticFeedback.lightImpact();
+
+    setState(() {
+      _dialogErrorMessage = null;
+      _currentStep = 1;
+    });
+  }
+
   void _goToStep2() async {
     if (!_formKeyStep1.currentState!.validate() || _selectedGender.isEmpty) {
       if (_selectedGender.isEmpty) {
-        setState(() {}); // Show gender error
+        setState(() {
+          _dialogErrorMessage = 'Mohon pilih jenis kelamin Anda.';
+        });
       }
       return;
     }
@@ -878,35 +1243,33 @@ class _BiodataDialogState extends State<BiodataDialog>
     HapticFeedback.lightImpact();
 
     setState(() {
-      _currentStep = 1;
+      _dialogErrorMessage = null;
+      _currentStep = 2;
     });
   }
 
   Future<void> _submitForm() async {
-    // Validate Step 2 inputs
+    // Validate Step 2 (Tentang Anda) inputs
+    final isCompetitionDetailMissing = _hasSportsCompetition == 'Ya' &&
+        (_competitionType == null || _competitionLevel == null);
+
     if (_isActiveSportsMember == null ||
         _sportsDuration == null ||
         _sportsFrequency == null ||
         _sportsLiking == null ||
         _hasSportsCompetition == null ||
-        _likesSportsCompetition == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
-            'Mohon jawab semua pertanyaan pada halaman Tentang Anda.',
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.orange.shade800,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.radiusS),
-          ),
-        ),
-      );
+        _likesSportsCompetition == null ||
+        isCompetitionDetailMissing) {
+      setState(() {
+        _dialogErrorMessage = isCompetitionDetailMissing
+            ? 'Mohon lengkapi detail kategori & tingkat kejuaraan pada pertanyaan #5.'
+            : 'Mohon jawab semua pertanyaan pada halaman Tentang Anda.';
+      });
       return;
     }
 
     setState(() {
+      _dialogErrorMessage = null;
       _isSubmitting = true;
     });
 
@@ -920,12 +1283,15 @@ class _BiodataDialogState extends State<BiodataDialog>
       gender: _selectedGender,
       age: int.parse(_ageController.text),
       educationLevel: _selectedEducationLevel,
+      surveyType: _selectedSurveyType,
       isActiveSportsMember: _isActiveSportsMember,
       sportsDuration: _sportsDuration,
       sportsFrequency: _sportsFrequency,
       sportsLiking: _sportsLiking,
       hasSportsCompetition: _hasSportsCompetition,
       likesSportsCompetition: _likesSportsCompetition,
+      competitionType: _hasSportsCompetition == 'Ya' ? _competitionType : null,
+      competitionLevel: _hasSportsCompetition == 'Ya' ? _competitionLevel : null,
     );
 
     setState(() {
@@ -941,19 +1307,9 @@ class _BiodataDialogState extends State<BiodataDialog>
       }
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              userProvider.errorMessage ?? 'Terjadi kesalahan saat mendaftar',
-              style: const TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.radiusS),
-            ),
-          ),
-        );
+        setState(() {
+          _dialogErrorMessage = userProvider.errorMessage ?? 'Terjadi kesalahan saat mendaftar';
+        });
       }
     }
   }

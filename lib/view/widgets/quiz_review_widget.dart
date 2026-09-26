@@ -308,7 +308,8 @@ class _QuizReviewWidgetState extends State<QuizReviewWidget>
                       color: isAdultMode
                           ? const Color(0xFF334155)
                           : AppColors.textPrimary,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: isAdultMode ? FontWeight.w600 : FontWeight.w500,
+                      fontSize: isAdultMode ? 15.0 : 13.0,
                     ),
                   ),
                   const SizedBox(height: 6),

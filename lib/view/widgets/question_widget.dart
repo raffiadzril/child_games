@@ -192,6 +192,8 @@ class _QuestionWidgetState extends State<QuestionWidget>
               style: AppFonts.headlineLarge.copyWith(
                 color: isAdultMode ? const Color(0xFF0F172A) : AppColors.textPrimary,
                 fontWeight: isAdultMode ? FontWeight.bold : FontWeight.w600,
+                fontSize: isAdultMode ? 24.0 : 20.0,
+                height: 1.3,
               ),
               textAlign: TextAlign.center,
             ),
@@ -497,6 +499,7 @@ class _QuestionWidgetState extends State<QuestionWidget>
                                       ? FontWeight.w700
                                       : FontWeight.w500)
                                   : FontWeight.w500,
+                              fontSize: isAdultMode ? 17.0 : 14.0,
                             ),
                           ),
                         ),
@@ -516,6 +519,7 @@ class _QuestionWidgetState extends State<QuestionWidget>
                                 ? FontWeight.w700
                                 : FontWeight.w500)
                             : FontWeight.w500,
+                        fontSize: isAdultMode ? 17.0 : 14.0,
                       ),
                     );
                   } else if (hasImage) {

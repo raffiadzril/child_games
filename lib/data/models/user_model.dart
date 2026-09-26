@@ -13,13 +13,16 @@ class UserModel extends BaseModel {
   final String school; // Optional
   final String role; // Auto set ke 'murid'
   
-  // Halaman Baru: Tentang Anda (Sports & Physical Activity Profile)
+  // Halaman Baru: Jenis Survei & Tentang Anda (Sports & Physical Activity Profile)
+  final String? surveyType; // 'PRE' atau 'POST'
   final String? isActiveSportsMember; // 'Ya' / 'Tidak'
   final String? sportsDuration; // 'Tidak pernah aktif', 'Kurang dari 1 tahun', '1-2 tahun', '3-4 tahun', 'Lebih dari 4 tahun'
   final String? sportsFrequency; // 'Tidak pernah', '1 kali', '2 kali', '3-4 kali', '5 kali atau lebih'
   final String? sportsLiking; // 'Sangat tidak menyukai', 'Tidak menyukai', 'Biasa saja', 'Menyukai', 'Sangat menyukai'
   final String? hasSportsCompetition; // 'Ya' / 'Tidak'
   final String? likesSportsCompetition; // 'Ya' / 'Tidak'
+  final String? competitionType; // 'Beregu' / 'Individu' / 'Keduanya'
+  final String? competitionLevel; // 'Internasional', 'Nasional', 'Provinsi', 'Kabupaten', 'Kecamatan', 'Belum Pernah Juara'
 
   @override
   final DateTime createdAt;
@@ -35,12 +38,15 @@ class UserModel extends BaseModel {
     this.className = '',
     this.school = '',
     this.role = 'murid',
+    this.surveyType,
     this.isActiveSportsMember,
     this.sportsDuration,
     this.sportsFrequency,
     this.sportsLiking,
     this.hasSportsCompetition,
     this.likesSportsCompetition,
+    this.competitionType,
+    this.competitionLevel,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : id = id ?? const Uuid().v4(),
@@ -57,12 +63,15 @@ class UserModel extends BaseModel {
       className: json['class'] as String? ?? '',
       school: json['school'] as String? ?? '',
       role: json['role'] as String? ?? 'murid',
+      surveyType: json['survey_type'] as String?,
       isActiveSportsMember: json['is_active_sports_member'] as String?,
       sportsDuration: json['sports_duration'] as String?,
       sportsFrequency: json['sports_frequency'] as String?,
       sportsLiking: json['sports_liking'] as String?,
       hasSportsCompetition: json['has_sports_competition'] as String?,
       likesSportsCompetition: json['likes_sports_competition'] as String?,
+      competitionType: json['competition_type'] as String?,
+      competitionLevel: json['competition_level'] as String?,
       createdAt:
           json['created_at'] != null
               ? DateTime.parse(json['created_at'] as String)
@@ -85,12 +94,15 @@ class UserModel extends BaseModel {
       'class': className,
       'school': school,
       'role': role,
+      'survey_type': surveyType,
       'is_active_sports_member': isActiveSportsMember,
       'sports_duration': sportsDuration,
       'sports_frequency': sportsFrequency,
       'sports_liking': sportsLiking,
       'has_sports_competition': hasSportsCompetition,
       'likes_sports_competition': likesSportsCompetition,
+      'competition_type': competitionType,
+      'competition_level': competitionLevel,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -106,12 +118,15 @@ class UserModel extends BaseModel {
     String? className,
     String? school,
     String? role,
+    String? surveyType,
     String? isActiveSportsMember,
     String? sportsDuration,
     String? sportsFrequency,
     String? sportsLiking,
     String? hasSportsCompetition,
     String? likesSportsCompetition,
+    String? competitionType,
+    String? competitionLevel,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -124,12 +139,15 @@ class UserModel extends BaseModel {
       className: className ?? this.className,
       school: school ?? this.school,
       role: role ?? this.role,
+      surveyType: surveyType ?? this.surveyType,
       isActiveSportsMember: isActiveSportsMember ?? this.isActiveSportsMember,
       sportsDuration: sportsDuration ?? this.sportsDuration,
       sportsFrequency: sportsFrequency ?? this.sportsFrequency,
       sportsLiking: sportsLiking ?? this.sportsLiking,
       hasSportsCompetition: hasSportsCompetition ?? this.hasSportsCompetition,
       likesSportsCompetition: likesSportsCompetition ?? this.likesSportsCompetition,
+      competitionType: competitionType ?? this.competitionType,
+      competitionLevel: competitionLevel ?? this.competitionLevel,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -137,7 +155,7 @@ class UserModel extends BaseModel {
 
   @override
   String toString() {
-    return 'UserModel(id: $id, name: $name, gender: $gender, age: $age, educationLevel: $educationLevel, role: $role)';
+    return 'UserModel(id: $id, name: $name, gender: $gender, age: $age, educationLevel: $educationLevel, role: $role, surveyType: $surveyType, competitionType: $competitionType, competitionLevel: $competitionLevel)';
   }
 
   @override
@@ -152,12 +170,15 @@ class UserModel extends BaseModel {
         other.className == className &&
         other.school == school &&
         other.role == role &&
+        other.surveyType == surveyType &&
         other.isActiveSportsMember == isActiveSportsMember &&
         other.sportsDuration == sportsDuration &&
         other.sportsFrequency == sportsFrequency &&
         other.sportsLiking == sportsLiking &&
         other.hasSportsCompetition == hasSportsCompetition &&
-        other.likesSportsCompetition == likesSportsCompetition;
+        other.likesSportsCompetition == likesSportsCompetition &&
+        other.competitionType == competitionType &&
+        other.competitionLevel == competitionLevel;
   }
 
   @override
@@ -170,12 +191,15 @@ class UserModel extends BaseModel {
         className.hashCode ^
         school.hashCode ^
         role.hashCode ^
+        surveyType.hashCode ^
         isActiveSportsMember.hashCode ^
         sportsDuration.hashCode ^
         sportsFrequency.hashCode ^
         sportsLiking.hashCode ^
         hasSportsCompetition.hashCode ^
-        likesSportsCompetition.hashCode;
+        likesSportsCompetition.hashCode ^
+        competitionType.hashCode ^
+        competitionLevel.hashCode;
   }
 }
 

@@ -17,7 +17,7 @@ if (keyPropertiesFile.exists()) {
 android {
     namespace = "com.example.child_games"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973"
+    ndkVersion = flutter.ndkVersion
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -29,10 +29,12 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = keyProperties["keyAlias"] as String
-            keyPassword = keyProperties["keyPassword"] as String
-            storeFile = keyProperties["storeFile"]?.let { file(it) }
-            storePassword = keyProperties["storePassword"] as String
+            if (keyPropertiesFile.exists() && keyProperties.containsKey("keyAlias")) {
+                keyAlias = keyProperties["keyAlias"] as String
+                keyPassword = keyProperties["keyPassword"] as String
+                storeFile = keyProperties["storeFile"]?.let { file(it) }
+                storePassword = keyProperties["storePassword"] as String
+            }
         }
     }
 
@@ -41,7 +43,7 @@ android {
         applicationId = "com.rei2026.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -49,7 +51,11 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            if (keyPropertiesFile.exists() && keyProperties.containsKey("keyAlias")) {
+                signingConfig = signingConfigs.getByName("release")
+            } else {
+                signingConfig = signingConfigs.getByName("debug")
+            }
         }
     }
 }
