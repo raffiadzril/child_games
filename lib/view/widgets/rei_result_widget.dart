@@ -95,11 +95,9 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
             // Header dengan animasi pulse
             _buildHeader(isAdultMode),
 
-            // Banner Kode Hasil Unik untuk Mode 13+
-            if (isAdultMode) ...[
-              const SizedBox(height: AppDimensions.marginM),
-              _buildUniqueCodeCard(isAdultMode),
-            ],
+            // Banner Kode Referensi Supabase (opaque, tanpa nilai di kode) — semua umur
+            const SizedBox(height: AppDimensions.marginM),
+            _buildUniqueCodeCard(isAdultMode),
 
             const SizedBox(height: AppDimensions.marginL),
 
@@ -791,15 +789,14 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
   }
 
   Widget _buildUniqueCodeCard(bool isAdultMode) {
-    // Generate code on the fly if model uniqueCode is empty
-    String displayCode = widget.reiResult.uniqueCode ?? '';
+    // KODE BARU = opaque referensi Supabase (REI-<UUID> / REI-<id>).
+    // Nilai TIDAK ditanam di kode — dashboard fetch nilai real dari Supabase.
+    String displayCode = (widget.reiResult.uniqueCode ?? '').trim();
     if (displayCode.isEmpty) {
-      final rPct = ((widget.reiResult.respect / 15.0) * 20.0).clamp(0.0, 100.0);
-      final ePct = ((widget.reiResult.equity / 15.0) * 20.0).clamp(0.0, 100.0);
-      final iPct = ((widget.reiResult.inclusion / 15.0) * 20.0).clamp(0.0, 100.0);
-      final oPct = (((rPct + ePct + iPct) / 3.0)).clamp(0.0, 100.0);
-      final codeId = (widget.reiResult.id.hashCode & 0xFFFFFF).toRadixString(16).toUpperCase().padLeft(6, '0');
-      displayCode = 'REI13-${rPct.toStringAsFixed(1)}-${ePct.toStringAsFixed(1)}-${iPct.toStringAsFixed(1)}-${oPct.toStringAsFixed(1)}-$codeId';
+      // Fallback: pakai id baris Supabase sebagai referensi (tetap opaque, tanpa %)
+      displayCode = 'REI-${widget.reiResult.id}';
+    } else if (!displayCode.toUpperCase().startsWith('REI-')) {
+      displayCode = 'REI-$displayCode';
     }
 
     return Container(
@@ -826,7 +823,7 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Kode Unik Hasil Asesmen REI (13+)',
+                  'Kode Referensi Hasil REI (Supabase)',
                   style: AppFonts.headlineSmall.copyWith(
                     color: isAdultMode ? const Color(0xFF1E1B4B) : Colors.white,
                     fontWeight: FontWeight.bold,
@@ -838,7 +835,7 @@ class _ReiResultWidgetState extends State<ReiResultWidget>
           ),
           const SizedBox(height: 6),
           Text(
-            'Salin kode di bawah dan masukkan ke Athlete Dashboard untuk mengklaim hasil tes Anda:',
+            'Kode ini hanya ID referensi (tanpa nilai). Salin lalu paste di SCL-vguard bagian REI untuk mengambil nilai real dari Supabase:',
             style: AppFonts.bodySmall.copyWith(
               color: isAdultMode ? const Color(0xFF4338CA) : Colors.white70,
               fontSize: 12,

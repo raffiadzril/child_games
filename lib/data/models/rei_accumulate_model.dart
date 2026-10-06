@@ -53,11 +53,11 @@ class ReiAccumulateModel extends BaseModel {
 
   factory ReiAccumulateModel.fromJson(Map<String, dynamic> json) {
     return ReiAccumulateModel(
-      id: json['id'].toString(), // bigint akan jadi string
-      userId: json['user_id'] as String,
-      respect: json['respect'] as int? ?? 0,
-      equity: json['equity'] as int? ?? 0,
-      inclusion: json['inclusion'] as int? ?? 0,
+      id: json['id'].toString(), // bigint/int atau string
+      userId: (json['user_id'] ?? '').toString(),
+      respect: (json['respect'] as num?)?.toInt() ?? 0,
+      equity: (json['equity'] as num?)?.toInt() ?? 0,
+      inclusion: (json['inclusion'] as num?)?.toInt() ?? 0,
       // New optional fields
       labelAnakRamahCategory: json['label_anak_ramah_category'] as String?,
       labelAnakRamahCategoryRespect:
@@ -92,6 +92,7 @@ class ReiAccumulateModel extends BaseModel {
       'respect': respect,
       'equity': equity,
       'inclusion': inclusion,
+      'unique_code': uniqueCode,
       // Optional fields
       'label_anak_ramah_category': labelAnakRamahCategory,
       'label_anak_ramah_category_respect': labelAnakRamahCategoryRespect,

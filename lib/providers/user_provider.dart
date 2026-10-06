@@ -1,6 +1,6 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 import '../data/models/user_model.dart';
 import '../data/models/user_answer_model.dart';
 import '../data/models/rei_accumulate_model.dart';
@@ -413,12 +413,10 @@ class UserProvider extends ChangeNotifier {
         }
       }
 
-      final respectPct = (respectMean * 20.0).clamp(0.0, 100.0);
-      final equityPct = (equityMean * 20.0).clamp(0.0, 100.0);
-      final inclusionPct = (inclusionMean * 20.0).clamp(0.0, 100.0);
-      final overallPct = (overallMean * 20.0).clamp(0.0, 100.0);
-      final randomId = Random().nextInt(0xFFFFFF).toRadixString(16).toUpperCase().padLeft(6, '0');
-      final generatedUniqueCode = 'REI13-${respectPct.toStringAsFixed(1)}-${equityPct.toStringAsFixed(1)}-${inclusionPct.toStringAsFixed(1)}-${overallPct.toStringAsFixed(1)}-$randomId';
+      // KODE BARU = OPAQUE UUID referensi Supabase (TANPA nilai persentase di kode).
+      // Nilai real (raw respect/equity/inclusion) diambil dashboard via lookup Supabase.
+      final generatedUuid = const Uuid().v4().toUpperCase();
+      final generatedUniqueCode = 'REI-$generatedUuid';
 
       final payload = {
         'user_id': _currentUser!.id,
@@ -434,6 +432,7 @@ class UserProvider extends ChangeNotifier {
         'inclusion_note': getInclusionNote(inclusionCat),
         'all_note':
             'Hasil Evaluasi REI 2026: Kategori $overallCat (Rerata: ${overallMean.toStringAsFixed(2)})',
+        'unique_code': generatedUuid,
         'created_at': DateTime.now().toIso8601String(),
       };
 
@@ -442,27 +441,46 @@ class UserProvider extends ChangeNotifier {
       try {
         final response =
             await _supabase.from('rei_accumulate').upsert(payload).select().single();
-        _reiResult = ReiAccumulateModel.fromJson(response).copyWith(uniqueCode: generatedUniqueCode);
+        // Pastikan uniqueCode = kode referensi opaque (bukan persentase)
+        final savedCode = (response['unique_code'] as String?)?.isNotEmpty == true
+            ? 'REI-${(response['unique_code'] as String).toUpperCase()}'
+            : generatedUniqueCode;
+        _reiResult = ReiAccumulateModel.fromJson(response).copyWith(uniqueCode: savedCode);
       } catch (dbErr) {
-        print('UserProvider: Supabase upsert error (using local model fallback): $dbErr');
-        _reiResult = ReiAccumulateModel(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          userId: _currentUser!.id,
-          respect: respectScore,
-          equity: equityScore,
-          inclusion: inclusionScore,
-          respectCategory: respectCat,
-          equityCategory: equityCat,
-          inclusionCategory: inclusionCat,
-          allCategory: overallCat,
-          respectNote: getRespectNote(respectCat),
-          equityNote: getEquityNote(equityCat),
-          inclusionNote: getInclusionNote(inclusionCat),
-          allNote: 'Hasil Evaluasi REI 2026: Kategori $overallCat (Rerata: ${overallMean.toStringAsFixed(2)})',
-          uniqueCode: generatedUniqueCode,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
+        final msg = dbErr.toString();
+        print('UserProvider: Supabase upsert error: $dbErr');
+        // Fallback jika kolom unique_code belum ada di Supabase:
+        // coba simpan tanpa unique_code, kode = REI-<id baris> (tetap opaque, tanpa %).
+        if (msg.contains('unique_code')) {
+          try {
+            final retryPayload = Map<String, dynamic>.from(payload)..remove('unique_code');
+            final retryResp = await _supabase
+                .from('rei_accumulate')
+                .upsert(retryPayload)
+                .select()
+                .single();
+            final rowId = retryResp['id'].toString();
+            _reiResult = ReiAccumulateModel.fromJson(retryResp)
+                .copyWith(uniqueCode: 'REI-$rowId');
+          } catch (retryErr) {
+            print('UserProvider: retry without unique_code failed: $retryErr');
+            _reiResult = _localFallbackRei(
+              respectScore, equityScore, inclusionScore,
+              respectCat, equityCat, inclusionCat, overallCat,
+              getRespectNote(respectCat), getEquityNote(equityCat),
+              getInclusionNote(inclusionCat), overallMean,
+              generatedUniqueCode,
+            );
+          }
+        } else {
+          _reiResult = _localFallbackRei(
+            respectScore, equityScore, inclusionScore,
+            respectCat, equityCat, inclusionCat, overallCat,
+            getRespectNote(respectCat), getEquityNote(equityCat),
+            getInclusionNote(inclusionCat), overallMean,
+            generatedUniqueCode,
+          );
+        }
       }
 
       _setLoading(false);
@@ -478,6 +496,41 @@ class UserProvider extends ChangeNotifier {
 
   /// Check if user has REI result
   bool get hasReiResult => _reiResult != null;
+
+  ReiAccumulateModel _localFallbackRei(
+    int respectScore,
+    int equityScore,
+    int inclusionScore,
+    String respectCat,
+    String equityCat,
+    String inclusionCat,
+    String overallCat,
+    String respectNote,
+    String equityNote,
+    String inclusionNote,
+    double overallMean,
+    String uniqueCode,
+  ) {
+    return ReiAccumulateModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      userId: _currentUser!.id,
+      respect: respectScore,
+      equity: equityScore,
+      inclusion: inclusionScore,
+      respectCategory: respectCat,
+      equityCategory: equityCat,
+      inclusionCategory: inclusionCat,
+      allCategory: overallCat,
+      respectNote: respectNote,
+      equityNote: equityNote,
+      inclusionNote: inclusionNote,
+      allNote:
+          'Hasil Evaluasi REI 2026: Kategori $overallCat (Rerata: ${overallMean.toStringAsFixed(2)})',
+      uniqueCode: uniqueCode,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+  }
 
   /// Reset REI result
   void resetReiResult() {
