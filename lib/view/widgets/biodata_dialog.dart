@@ -76,7 +76,7 @@ class _BiodataDialogState extends State<BiodataDialog>
     'Provinsi',
     'Kabupaten',
     'Kecamatan',
-    'Belum Pernah Juara',
+    'Lokal',
   ];
 
   final List<String> _durationOptions = [

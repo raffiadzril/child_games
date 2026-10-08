@@ -22,7 +22,7 @@ class UserModel extends BaseModel {
   final String? hasSportsCompetition; // 'Ya' / 'Tidak'
   final String? likesSportsCompetition; // 'Ya' / 'Tidak'
   final String? competitionType; // 'Beregu' / 'Individu' / 'Keduanya'
-  final String? competitionLevel; // 'Internasional', 'Nasional', 'Provinsi', 'Kabupaten', 'Kecamatan', 'Belum Pernah Juara'
+  final String? competitionLevel; // 'Internasional', 'Nasional', 'Provinsi', 'Kabupaten', 'Kecamatan', 'Lokal'
 
   @override
   final DateTime createdAt;
