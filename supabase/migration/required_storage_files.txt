@@ -1,0 +1,49 @@
+# Required storage files for the new Supabase project
+# Generated from the old database dump + app code references.
+# Upload each file to the same bucket/path in the new project.
+# Paths are URL-decoded (spaces are real spaces).
+#
+# Status (2026-10-28): all referenced files uploaded — 15 question videos,
+# 3 option images, challenges-1.png, and logo. Sound/music is intentionally
+# not migrated (--no-sound; AppConfig disables both).
+# question/12_... was re-encoded to 1080p (~7.5 MiB) to fit the Free plan's
+# 50 MB per-file limit; the other videos are the original files.
+#
+# The downloaded question files were slugified to avoid brackets/spaces in
+# Storage object keys. The database is updated to these exact paths by
+# upload_local_assets.mjs.
+#
+# option/senyum.png is uploaded as option/challenge-sopan-ramah/smile.png
+# because that is the path stored in public.options.image_url.
+
+## Already uploaded
+challenges/logo.png
+
+## challenges (1 file(s))
+challenges/challenges-1.png
+
+## option (3 file(s))
+option/challenge-sopan-ramah/flat.png
+option/challenge-sopan-ramah/sad.png
+option/challenge-sopan-ramah/smile.png
+
+## question (15 file(s))
+question/1_aku-ramah-dan-sopan.mp4
+question/2_aku-mendengarkan-jika-temanku-berbicara.mp4
+question/3_aku-taat-pada-aturan.mp4
+question/4_aku-baik-kepada-semua-orang.mp4
+question/5_aku-bangga-pada-diriku.mp4
+question/6_aku-senang-jika-temanku-bermain-adil.mp4
+question/7_aku-selalu-bermain-dengan-adil.mp4
+question/8_aku-rajin-membantu.mp4
+question/9_aku-suka-keadilan.mp4
+question/10_aku-suka-berbagi-dengan-adil-tanpa-membeda-bedakan.mp4
+question/11_aku-suka-mengajak-semua-temanku-bermain-bersama.mp4
+question/12_aku-bisa-bermain-dengan-siapa-saja.mp4
+question/13_aku-tidak-pernah-membiarkan-temanku-menyendiri.mp4
+question/14_aku-merasa-bahwa-berbeda-itu-bukan-masalah.mp4
+question/15_aku-mendukung-temanku-agar-lebih-percaya-diri.mp4
+
+## sound-music-vocal (2 file(s) - intentionally skipped)
+sound-music-vocal/music/funny-cartoon-kids-background-music-350273.mp3
+sound-music-vocal/soundeffect/click-app.mp3

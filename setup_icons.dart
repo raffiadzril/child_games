@@ -8,7 +8,7 @@ Future<void> downloadAndSetupIcons() async {
     // Download logo from URL
     final response = await http.get(
       Uri.parse(
-        'https://jokvxdrxswytjjhxuhvk.supabase.co/storage/v1/object/public/challenges/logo.png',
+        'https://gskxaynpuycgbitgewwk.supabase.co/storage/v1/object/public/challenges/logo.png',
       ),
     );
 

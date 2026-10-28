@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/dimensions.dart';
+import '../../core/config/supabase_config.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/radius.dart';
 import '../../core/services/sound_service.dart';
@@ -362,7 +363,7 @@ class _AgeSelectionScreenState extends State<AgeSelectionScreen>
                           ),
                           padding: const EdgeInsets.all(10),
                           child: Image.network(
-                            'https://jokvxdrxswytjjhxuhvk.supabase.co/storage/v1/object/public/challenges/logo.png',
+                            SupabaseConfig.mediaObject('challenges/logo.png'),
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) =>
                                 const Icon(

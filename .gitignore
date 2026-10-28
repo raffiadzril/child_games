@@ -47,3 +47,16 @@ build/
 android/build/
 android/app/build/
 
+# Supabase migration dumps (contain user data and auth rows)
+supabase/migration/dump/
+
+# Supabase CLI temporary files
+supabase/.temp/
+
+# Downloaded Supabase Storage files (large media; upload, don't commit)
+assets-supabase/
+asset-supabase/
+
+# R2 staging folder (720p transcodes ready to upload to Cloudflare R2)
+assets-r2/
+

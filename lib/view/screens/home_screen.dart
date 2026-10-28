@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/colors.dart';
+import '../../core/config/supabase_config.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/services/sound_service.dart';
 import '../../providers/user_provider.dart';
@@ -135,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               ],
                             ),
                             child: Image.network(
-                              'https://jokvxdrxswytjjhxuhvk.supabase.co/storage/v1/object/public/challenges/logo.png',
+                              SupabaseConfig.mediaObject('challenges/logo.png'),
                               width: 50,
                               height: 50,
                               fit: BoxFit.contain,

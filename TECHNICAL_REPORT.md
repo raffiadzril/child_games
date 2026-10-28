@@ -626,7 +626,7 @@ CREATE TABLE rei_accumulate (
 **Supabase Configuration**
 ```dart
 await Supabase.initialize(
-  url: 'https://jokvxdrxswytjjhxuhvk.supabase.co',
+  url: 'https://gskxaynpuycgbitgewwk.supabase.co',
   anonKey: '[SUPABASE_ANON_KEY]',
 );
 ```
@@ -816,7 +816,7 @@ android {
 ```dart
 // Environment variables untuk different stages
 class AppConfig {
-  static const String supabaseUrl = 'https://jokvxdrxswytjjhxuhvk.supabase.co';
+  static const String supabaseUrl = 'https://gskxaynpuycgbitgewwk.supabase.co';
   static const String supabaseAnonKey = '[ANON_KEY]';
   static const bool enableLogging = true;
   static const String appVersion = '1.0.0';

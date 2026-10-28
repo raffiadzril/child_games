@@ -1,5 +1,6 @@
 import 'package:just_audio/just_audio.dart';
 import '../config/app_config.dart';
+import '../config/supabase_config.dart';
 
 /// Service untuk mengelola sound effects dan background music
 class SoundService {
@@ -41,12 +42,16 @@ class SoundService {
   bool _isInitialized = false;
 
   // Sound effect URLs
-  static const String _clickSoundUrl =
-      'https://jokvxdrxswytjjhxuhvk.supabase.co/storage/v1/object/sign/sound-music-vocal/soundeffect/click-app.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81YmE3YTAzZi1hZWNiLTQ2ZWYtOGFlYS0xYWIwNzUwZTcxMmYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzb3VuZC1tdXNpYy12b2NhbC9zb3VuZGVmZmVjdC9jbGljay1hcHAubXAzIiwiaWF0IjoxNzUzNDc3NjI4LCJleHAiOjE3ODUwMTM2Mjh9.QaogsHtFEnWumgVYGhGYYhlrUZasw-UtGxOU2jEx7OU';
+  static final String _clickSoundUrl = SupabaseConfig.publicObject(
+    'sound-music-vocal',
+    'soundeffect/click-app.mp3',
+  );
 
   // Background music URL
-  static const String _backgroundMusicUrl =
-      'https://jokvxdrxswytjjhxuhvk.supabase.co/storage/v1/object/public/sound-music-vocal/music/funny-cartoon-kids-background-music-350273.mp3';
+  static final String _backgroundMusicUrl = SupabaseConfig.publicObject(
+    'sound-music-vocal',
+    'music/funny-cartoon-kids-background-music-350273.mp3',
+  );
 
   /// Initialize audio players
   Future<void> initialize() async {

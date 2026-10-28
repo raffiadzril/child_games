@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/config/app_config.dart';
+import '../../core/config/supabase_config.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/radius.dart';
@@ -232,7 +233,7 @@ class _AdultHomeScreenState extends State<AdultHomeScreen> {
             ),
             padding: const EdgeInsets.all(6),
             child: Image.network(
-              'https://jokvxdrxswytjjhxuhvk.supabase.co/storage/v1/object/public/challenges/logo.png',
+              SupabaseConfig.mediaObject('challenges/logo.png'),
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) => const Icon(
                 Icons.shield_outlined,

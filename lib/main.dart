@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/theme/app_theme.dart';
+import 'core/config/supabase_config.dart';
 import 'core/services/sound_service.dart';
 import 'view/screens/splash_screen.dart';
 import 'view/screens/age_selection_screen.dart';
@@ -17,9 +18,8 @@ Future<void> main() async {
 
   try {
     await Supabase.initialize(
-      url: 'https://jokvxdrxswytjjhxuhvk.supabase.co',
-      anonKey:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impva3Z4ZHJ4c3d5dGpqaHh1aHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM0MzMwMjIsImV4cCI6MjA2OTAwOTAyMn0.hKilH2syHkxQOnAQ8TlPB7sJOCDRihxzNqv-3MzXgPU',
+      url: SupabaseConfig.url,
+      anonKey: SupabaseConfig.anonKey,
     );
     print('✅ Supabase initialized successfully');
   } catch (e) {
